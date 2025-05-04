@@ -1,18 +1,35 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    console.log("Sign up with:", { email, password });
-
-    navigate("/login");
+    setSuccess("");
+    try {
+      const response = await axios.post(
+        "https://localhost:7195/api/Auth/register",
+        { email, password },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Signup success:", response.data);
+      setSuccess("Account created successfully!");
+      navigate("/login");
+    } catch (err) {
+      console.error("Signup error:", err.response?.data || err.message);
+      setError(err.response?.data || "Signup failed.");
+    }
   };
 
   return (
@@ -21,7 +38,6 @@ export default function SignUp() {
         <img
           src="/placeholder.svg?height=1080&width=1920"
           alt="Background"
-          fill
           className="object-cover"
         />
       </div>
@@ -121,12 +137,12 @@ export default function SignUp() {
 
         <div className="mt-6 text-center text-sm">
           <span className="text-gray-500">Already Have An Account?</span>{" "}
-          <Link
+          <a
             href="/login"
             className="text-gray-800 font-medium hover:underline"
           >
             Log In
-          </Link>
+          </a>
         </div>
       </div>
     </div>
