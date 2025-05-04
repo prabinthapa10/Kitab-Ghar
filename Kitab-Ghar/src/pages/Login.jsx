@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Navbar from "../components/Navbar";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -9,26 +10,30 @@ function Login() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
-
     try {
       const response = await axios.post(
         "https://localhost:7195/api/Auth/login",
         {
           email,
           password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
       );
-
-      setSuccess("Registration successful!");
-      console.log(response.data);
-      // Redirect or further action here
+      setSuccess("Login successful!");
+      console.log("Login response:", response.data);
+      navigate("/");
     } catch (err) {
-      setError("Registration failed. Please try again.");
-      console.error(err);
+      console.error("Login error:", err.response?.data || err.message);
+      setError(err.response?.data || "Login failed.");
     }
   };
 
