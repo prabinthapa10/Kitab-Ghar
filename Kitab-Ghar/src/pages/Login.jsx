@@ -1,10 +1,37 @@
 import React, { useState } from "react";
 import Navbar from "../components/Navbar";
+import axios from "axios";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    try {
+      const response = await axios.post(
+        "https://localhost:7195/api/Auth/login",
+        {
+          email,
+          password,
+        }
+      );
+
+      setSuccess("Registration successful!");
+      console.log(response.data);
+      // Redirect or further action here
+    } catch (err) {
+      setError("Registration failed. Please try again.");
+      console.error(err);
+    }
+  };
+
   return (
     <>
       <Navbar />
@@ -13,12 +40,12 @@ function Login() {
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             Login to your account
           </h2>
-          <form className="space-y-5">
+          <form className="space-y-5" onSubmit={handleSubmit}>
             {/* Email */}
             <div>
               <label className="text-sm text-gray-700 block mb-1">Email</label>
               <input
-                type="email"
+                type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="balamia@gmail.com"
@@ -49,6 +76,9 @@ function Login() {
                 </span>
               </div>
             </div>
+
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {success && <p className="text-green-600 text-sm">{success}</p>}
 
             {/* Button */}
             <button
