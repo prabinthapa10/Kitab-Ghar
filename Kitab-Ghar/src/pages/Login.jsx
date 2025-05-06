@@ -40,7 +40,7 @@ function Login() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen flex items-center justify-center bg-[url('/images/loginbg.jpg')] bg-cover bg-center">
+      <div className="min-h-screen flex items-center justify-center bg-[url('/assets/loginbg.jpg')] bg-cover bg-center">
         <div className="bg-white/90 p-8 rounded-2xl shadow-lg w-full max-w-md">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             Login to your account

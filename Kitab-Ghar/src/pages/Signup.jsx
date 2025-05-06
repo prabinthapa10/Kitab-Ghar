@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export default function SignUp() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -16,7 +18,7 @@ export default function SignUp() {
     try {
       const response = await axios.post(
         "https://localhost:7195/api/Auth/register",
-        { email, password },
+        { name, email, address, password },
         {
           headers: {
             "Content-Type": "application/json",
@@ -33,14 +35,12 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 relative">
-      <div className="absolute inset-0 z-0 opacity-20">
-        <img
-          src="/placeholder.svg?height=1080&width=1920"
-          alt="Background"
-          className="object-cover"
-        />
-      </div>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 relative overflow-hidden">
+      <img
+        src="/assets/loginbg.jpg"
+        alt="Background"
+        className="absolute inset-0 w-full h-full object-cover z-0 opacity-20"
+      />
 
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md z-10">
         <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
@@ -50,17 +50,48 @@ export default function SignUp() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Name
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Ram Bahadur"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label
               htmlFor="email"
               className="block text-sm font-medium text-gray-700"
             >
               Email
             </label>
             <input
-              id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="example@email.com"
+              placeholder="abc@email.com"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label
+              htmlFor="address"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Address
+            </label>
+            <input
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Newroad-9, pokhara"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
             />
           </div>
