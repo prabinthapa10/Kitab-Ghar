@@ -17,8 +17,8 @@ export default function SignUp() {
     setSuccess("");
     try {
       const response = await axios.post(
-        "https://localhost:7195/api/Auth/register",
-        { name, email, address, password },
+        "https://localhost:7195/api/Auth/register-member",
+        { name, address, email, password },
         {
           headers: {
             "Content-Type": "application/json",
@@ -30,7 +30,9 @@ export default function SignUp() {
       navigate("/login");
     } catch (err) {
       console.error("Signup error:", err.response?.data || err.message);
-      setError(err.response?.data || "Signup failed.");
+      setError(
+        err.response?.data?.Message || err.response?.data || "Signup failed."
+      );
     }
   };
 

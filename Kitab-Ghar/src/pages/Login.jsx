@@ -17,7 +17,7 @@ function Login() {
     setSuccess("");
     try {
       const response = await axios.post(
-        "https://localhost:7195/api/Auth/login",
+        "https://localhost:7195/api/Auth/login-token",
         {
           email,
           password,
@@ -98,7 +98,7 @@ function Login() {
           <p className="text-center text-sm text-gray-600 mt-5">
             Don’t Have An Account?{" "}
             <a
-              href="/signup"
+              href="/register"
               className="text-black font-medium hover:underline"
             >
               Sign Up
