@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import BookCard from "../components/BookCard";
+import { useNavigate } from "react-router-dom";
 
 const Book = () => {
   const [books, setBooks] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch("https://localhost:7195/api/Books")
@@ -23,20 +25,25 @@ const Book = () => {
           {books.length > 0 ? (
             books.map((book) => {
               return (
-                <BookCard
-                  id={book.bookId}
-                  title={book.title}
-                  genre={book.genre}
-                  price={book.price}
-                  discount={book.discount}
-                />
+                <>
+                  <div
+                    onClick={() => navigate(`/book/${book.bookId}`)}
+                    className="p-0 bg-white rounded-lg overflow-hidden shadow-md transition-all duration-300 cursor-pointer"
+                  >
+                    <BookCard
+                      id={book.bookId}
+                      title={book.title}
+                      genre={book.genre}
+                      price={book.price}
+                      discount={book.discount}
+                    />
+                  </div>
+                </>
               );
             })
           ) : (
             <div className="col-span-full text-center py-8">
-              <p className="text-lg text-muted-foreground">
-                No books found.
-              </p>
+              <p className="text-lg text-muted-foreground">No books found.</p>
             </div>
           )}
         </div>

@@ -19,31 +19,42 @@ const AddBook = () => {
     reviews: [],
     bookmarks: [],
     discounts: [],
+    image: "", // will hold base64 string
   });
 
+  // Handle text input changes
   const handleChange = (e) => {
-    // Get the input's name and value
-    const name = e.target.name;
-    const value = e.target.value;
-
-    // Update that specific field in the book state
-    setBook({
-      ...book,
+    const { name, value } = e.target;
+    setBook((prevBook) => ({
+      ...prevBook,
       [name]: value,
-    });
+    }));
   };
 
+  // Convert uploaded image to base64 and store in book.image
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBook((prevBook) => ({
+          ...prevBook,
+          image: reader.result,
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Submit book with base64 image
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const response = await axios.post(
         "https://localhost:7195/api/Books",
         book,
         {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         }
       );
       console.log("Book added successfully:", response.data);
@@ -54,6 +65,7 @@ const AddBook = () => {
       );
     }
   };
+
   return (
     <div className="flex">
       <AdminSidebar />
@@ -228,6 +240,19 @@ const AddBook = () => {
               name="tags"
               value={book.tags}
               onChange={handleChange}
+              className="w-full p-2 border rounded-md"
+              required
+            />
+          </div>
+          {/* Image Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Image
+            </label>
+            <input
+              type="file"
+              name="image/*"
+              onChange={handleImageChange}
               className="w-full p-2 border rounded-md"
               required
             />
