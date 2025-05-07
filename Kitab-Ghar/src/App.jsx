@@ -1,14 +1,12 @@
-import { useState } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import AddBook from "./pages/Admin/AddBook";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
+import BookDescriptionPage from "./pages/BookDescriptionPage";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import AdminDashboard from "./pages/Admin/AdminDashboard";
-import AddBook from "./pages/Admin/AddBook";
-import BookCard from "./components/BookCard";
 import Book from "./pages/Book";
-import BookDescriptionPage from "./pages/BookDescriptionPage";
 
 function App() {
   return (
