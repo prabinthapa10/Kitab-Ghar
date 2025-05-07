@@ -19,7 +19,7 @@ const AddBook = () => {
     reviews: [],
     bookmarks: [],
     discounts: [],
-    image: "", // will hold base64 string
+    image: "",
   });
 
   // Handle text input changes
@@ -31,19 +31,17 @@ const AddBook = () => {
     }));
   };
 
-  // Convert uploaded image to base64 and store in book.image
-  const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setBook((prevBook) => ({
-          ...prevBook,
-          image: reader.result,
-        }));
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const fileName = file.name;
+    const imagePath = `/assets/books/${fileName}`;
+
+    setBook({
+      ...book,
+      image: imagePath,
+    });
   };
 
   // Submit book with base64 image
@@ -252,7 +250,7 @@ const AddBook = () => {
             <input
               type="file"
               name="image/*"
-              onChange={handleImageChange}
+              onChange={handleImageUpload}
               className="w-full p-2 border rounded-md"
               required
             />
