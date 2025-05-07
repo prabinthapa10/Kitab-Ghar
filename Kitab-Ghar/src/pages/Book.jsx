@@ -18,6 +18,8 @@ const Book = () => {
       });
   }, []);
 
+  console.log("bok", books);
+
   return (
     <>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -32,6 +34,7 @@ const Book = () => {
                   >
                     <BookCard
                       id={book.bookId}
+                      image={book.image}
                       title={book.title}
                       genre={book.genre}
                       price={book.price}
