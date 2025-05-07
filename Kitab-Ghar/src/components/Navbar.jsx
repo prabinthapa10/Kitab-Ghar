@@ -25,7 +25,9 @@ function Navbar() {
         <Link to="/">
           <li>Home</li>
         </Link>
-        <li>Book</li>
+        <Link to="/book">
+          <li>Book</li>
+        </Link>
         <li>About</li>
         <li>Contact</li>
       </ul>
@@ -35,7 +37,7 @@ function Navbar() {
         <a href="/login">
           <FontAwesomeIcon icon={faUser} />
         </a>
-        <a href="#">
+        <a href="/Book">
           <FontAwesomeIcon icon={faSearch} />
         </a>
         <a href="#">
