@@ -10,7 +10,6 @@ import BookCard from "./components/BookCard";
 import Book from "./pages/Book";
 import BookDescriptionPage from "./pages/BookDescriptionPage";
 
-
 function App() {
   return (
     <>
@@ -23,9 +22,10 @@ function App() {
           <Route path="/admin/addBook" element={<AddBook />} />
           <Route path="/book" element={<Book />} />
           <Route path="/book/:id" element={<BookDescriptionPage />} />
-          <Route path="/book_card" element={<BookCard />} />
+
+          {/* <Route path="/book_card" element={<BookCard />} /> */}
           {/* <Route path="/book/" element={<BookList />} /> */}
-          <Route path="/book/:id" element={<BookDescription />} />
+          {/* <Route path="/book/:id" element={<BookDescriptionPage />} /> */}
         </Routes>
       </BrowserRouter>
     </>
