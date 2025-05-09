@@ -13,32 +13,39 @@ function Login() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
-    try {
-      const response = await axios.post(
-        "https://localhost:7195/api/Auth/login-token",
-        { email, password },
-        { headers: { "Content-Type": "application/json" } }
-      );
-      
-      const token = response.data.token;
-      console.log("Token received:", token);
-      
-      // First update all auth state
-      setToken(token);
-      setIsLoggedIn(true);
-      setSuccess("Login successful!");
-      
-      // Then navigate after a brief delay to ensure state is saved
-      setTimeout(() => navigate("/"), 100);
-      
-    } catch (err) {
-      console.error("Login error:", err.response?.data || err.message);
-      setError(err.response?.data || "Login failed.");
-    }
-  };
+  e.preventDefault();
+  setError("");
+  setSuccess("");
+  try {
+    const response = await axios.post(
+      "https://localhost:7195/api/Auth/login-token",
+      { email, password },
+      { headers: { "Content-Type": "application/json" } }
+    );
+    
+    const token = response.data.token;
+    console.log("Token received:", token);
+    
+    // Debug before setting
+    console.log("Before setToken - localStorage token:", localStorage.getItem("token"));
+    
+    setToken(token);
+    setIsLoggedIn(true);
+    
+    // Debug after setting
+    setTimeout(() => {
+      console.log("After setToken - localStorage token:", localStorage.getItem("token"));
+      console.log("After setToken - authState should be updated");
+    }, 0);
+    
+    setSuccess("Login successful!");
+    setTimeout(() => navigate("/"), 100);
+    
+  } catch (err) {
+    console.error("Login error:", err.response?.data || err.message);
+    setError(err.response?.data || "Login failed.");
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 relative overflow-hidden">

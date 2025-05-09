@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import getUserDetails from "../utils/CheckUserDetails";
 
 const AuthContext = createContext();
@@ -12,93 +12,131 @@ export const AuthProvider = ({ children }) => {
         token,
         user, 
         isLoggedIn: !!token,
-        loading: true,
+        loading: !!token, // Only load if we have a token
+        error: null,
       };
     } catch (error) {
-      console.error("Error retrieving token from localStorage:", error);
+      console.error("Error initializing auth state:", error);
       return {
         token: null,
         user: null,
         isLoggedIn: false,
         loading: false,
+        error: "Failed to initialize auth state",
       };
     }
   });
 
-  const { token, user, isLoggedIn, loading } = authState;
+  const { token, user, isLoggedIn, loading, error } = authState;
 
-  const updateAuthState = (newState) => {
+  const updateAuthState = useCallback((newState) => {
     setAuthState((prev) => ({
       ...prev,
       ...newState,
     }));
-  };
+  }, []);
 
-  const updateUser = (newUserDetails) => {
-    if (newUserDetails) {
-      localStorage.setItem("user", JSON.stringify(newUserDetails));
-      updateAuthState({ user: newUserDetails });
-    } else {
-      localStorage.removeItem("user");
-      updateAuthState({ user: null });
+  const updateUser = useCallback((newUserDetails) => {
+    try {
+      if (newUserDetails) {
+        localStorage.setItem("user", JSON.stringify(newUserDetails));
+        updateAuthState({ user: newUserDetails, error: null });
+      } else {
+        localStorage.removeItem("user");
+        updateAuthState({ user: null });
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
+      updateAuthState({ error: "Failed to update user" });
     }
-  };
+  }, [updateAuthState]);
 
-  const updateToken = (newToken) => {
-    console.log("Updating token:", newToken);
+  const updateToken = useCallback((newToken) => {
     try {
       if (newToken) {
         localStorage.setItem("token", newToken);
-        console.log("Token saved to localStorage:", localStorage.getItem("token")); // Verify immediately
-        updateAuthState({
+        updateAuthState({ 
           token: newToken,
           isLoggedIn: true,
+          loading: true, // Set loading true when we get a new token
+          error: null 
         });
       } else {
         localStorage.removeItem("token");
         updateAuthState({
           token: null,
           isLoggedIn: false,
+          user: null,
+          loading: false,
         });
       }
     } catch (error) {
-      console.error("LocalStorage error:", error);
+      console.error("Error updating token:", error);
+      updateAuthState({ error: "Failed to update token" });
     }
-  };
+  }, [updateAuthState]);
 
-  const logout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    updateAuthState({
-      token: null,
-      user: null,
-      isLoggedIn: false,
-      loading: false,
-    });
-  };
+  const logout = useCallback(() => {
+    try {
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      updateAuthState({
+        token: null,
+        user: null,
+        isLoggedIn: false,
+        loading: false,
+        error: null,
+      });
+    } catch (error) {
+      console.error("Error during logout:", error);
+      updateAuthState({ error: "Failed to logout" });
+    }
+  }, [updateAuthState]);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      if (!authState.token) {
+    let isMounted = true;
+    
+    const fetchUserDetails = async () => {
+      if (!token) {
         updateAuthState({ loading: false });
         return;
       }
 
       try {
-        const userDetails = await getUserDetails(authState.token);
-        updateAuthState({
-          user: userDetails,
-          isLoggedIn: true, // Ensure isLoggedIn stays true
-          loading: false
-        });
+        const userDetails = await getUserDetails(token);
+        if (!isMounted) return;
+
+        if (userDetails) {
+          updateAuthState({
+            user: userDetails,
+            isLoggedIn: true,
+            loading: false,
+            error: null,
+          });
+        } else {
+          // Token might be invalid, but don't logout automatically
+          updateAuthState({ 
+            loading: false,
+            error: "Failed to fetch user details" 
+          });
+        }
       } catch (error) {
-        console.error("Failed to fetch user details", error);
-        logout();
+        if (!isMounted) return;
+        console.error("Error in fetchUserDetails:", error);
+        updateAuthState({ 
+          loading: false,
+          error: error.message 
+        });
+        // Don't automatically logout - let the UI decide
       }
     };
 
-    fetchUser();
-  }, [authState.token]);
+    fetchUserDetails();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [token, updateAuthState]);
 
   return (
     <AuthContext.Provider
@@ -112,6 +150,7 @@ export const AuthProvider = ({ children }) => {
         role: user?.role,
         name: user?.name,
         isLoggedIn,
+        error,
         setIsLoggedIn: (value) => updateAuthState({ isLoggedIn: value }),
       }}
     >

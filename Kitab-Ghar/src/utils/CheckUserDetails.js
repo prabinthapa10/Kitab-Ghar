@@ -16,15 +16,10 @@ const CheckUserDetails = async (token) => {
     const { name, role } = response.data;
     console.log("Fetched user details:", { name, role });
 
-    return {
-      name,
-      role
-    };
+    return { name, role };
   } catch (error) {
-    if (error.response && error.response.status === 401) {
-      console.error("Error fetching data:", error);
-      localStorage.removeItem("token");
-    }
+    console.error("Error fetching user details:", error);
+    // Don't remove token here - let the calling code handle it
     return null;
   }
 };
