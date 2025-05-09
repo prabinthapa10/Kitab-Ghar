@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const BookCard = ({ id, name, image, genre, price, discount }) => {
+const BookCard = ({ id, title, image, genre, price, discount }) => {
   const navigate = useNavigate();
 
   return (
@@ -20,7 +20,7 @@ const BookCard = ({ id, name, image, genre, price, discount }) => {
         </div>
       </div>
       <div className="p-4">
-        <h3 className="text-lg font-semibold">{name}</h3>
+        <h3 className="text-lg font-semibold">{title|| "asdf"}</h3>
         <p className="text-gray-500 text-sm">{genre}</p>
         <div className="mt-2">
           <span className="text-lg font-bold text-gray-900">Rs {price}</span>

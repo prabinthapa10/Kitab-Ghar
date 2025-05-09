@@ -1,15 +1,16 @@
 import React from "react";
 import Navbar from "../components/Navbar";
 import Book from "./Book";
-import BookCard from "../components/BookCard";
-import Feature from "./Feature Product";
+import AllBooks from "./AllBooks";
 
 function Home() {
+  const aa = localStorage.getItem("token");
+
+  console.log("adsf",aa);
   return (
     <div>
       <Navbar />
-      <h2>Feature</h2>
-      <Feature />
+      <AllBooks />
     </div>
   );
 }
