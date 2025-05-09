@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useAuth } from "../Context/AuthContext";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -8,6 +9,7 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const { setToken, setIsLoggedIn } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -20,9 +22,18 @@ function Login() {
         { email, password },
         { headers: { "Content-Type": "application/json" } }
       );
+      
+      const token = response.data.token;
+      console.log("Token received:", token);
+      
+      // First update all auth state
+      setToken(token);
+      setIsLoggedIn(true);
       setSuccess("Login successful!");
-      console.log("Login response:", response.data);
-      navigate("/");
+      
+      // Then navigate after a brief delay to ensure state is saved
+      setTimeout(() => navigate("/"), 100);
+      
     } catch (err) {
       console.error("Login error:", err.response?.data || err.message);
       setError(err.response?.data || "Login failed.");
