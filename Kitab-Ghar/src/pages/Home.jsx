@@ -11,6 +11,7 @@ function Home() {
     <div>
       <Navbar />
       <AllBooks />
+      asdfasdf
     </div>
   );
 }
