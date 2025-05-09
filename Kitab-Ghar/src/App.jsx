@@ -7,6 +7,8 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Book from "./pages/Book";
+import UserDetails from "./components/UserDetail";
+import CartPage from "./pages/CartPage";
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
           <Route path="/admin/addBook" element={<AddBook />} />
           <Route path="/book" element={<Book />} />
           <Route path="/book/:id" element={<BookDescriptionPage />} />
+          <Route path="/user" element={<UserDetails />} />
+          <Route path="/cart" element={<CartPage/>} />
 
           {/* <Route path="/book_card" element={<BookCard />} /> */}
           {/* <Route path="/book/" element={<BookList />} /> */}
