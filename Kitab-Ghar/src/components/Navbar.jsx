@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Search } from "lucide-react";
-
 import {
   faUser,
   faSearch,
@@ -14,7 +13,23 @@ import { Link } from "react-router-dom";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeLink, setActiveLink] = useState(""); // Track active menu item
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Set active link based on current route
+    const path = location.pathname;
+    if (path.includes("book")) {
+      setActiveLink("book");
+    } else if (path.includes("about")) {
+      setActiveLink("about");
+    } else if (path.includes("contact")) {
+      setActiveLink("contact");
+    } else {
+      setActiveLink("home");
+    }
+  }, [location]);
 
   const toggleDropdown = (e) => {
     e.preventDefault();
@@ -34,11 +49,19 @@ function Navbar() {
     setIsOpen(false);
   };
 
+  const handleLinkClick = (link) => {
+    setActiveLink(link); // Set the clicked link as active
+  };
+
   return (
     <div className="bg-white shadow px-6 py-4 flex items-center justify-between">
       {/* Left: Logo */}
       <div className="flex items-center space-x-2">
-        <img src="/assets/logo.png" alt="Kitab Ghar Logo" className="w-8 h-8" />
+        <img
+          src="/assets/logo.png"
+          alt="Kitab Ghar Logo"
+          className="w-[50px] h-[50px]"
+        />
         <ul>
           <li>
             <Link to="/">
@@ -52,14 +75,42 @@ function Navbar() {
 
       {/* Middle: Navigation */}
       <ul className="hidden md:flex space-x-6 text-sm font-medium text-black">
-        <Link to="/">
-          <li>Home</li>
-        </Link>
-        <Link to="/book">
-          <li>Book</li>
-        </Link>
-        <li>About</li>
-        <li>Contact</li>
+        <li>
+          <Link
+            to="/"
+            onClick={() => handleLinkClick("home")} // Set home as active
+            className={`${activeLink === "home" ? "text-amber-600" : ""}`}
+          >
+            Home
+          </Link>
+        </li>
+        <li>
+          <Link
+            to="/book"
+            onClick={() => handleLinkClick("book")} // Set book as active
+            className={`${activeLink === "book" ? "text-amber-600" : ""}`}
+          >
+            Book
+          </Link>
+        </li>
+        <li>
+          <Link
+            to="/about"
+            onClick={() => handleLinkClick("about")} // Set about as active
+            className={`${activeLink === "about" ? "text-amber-600" : ""}`}
+          >
+            About
+          </Link>
+        </li>
+        <li>
+          <Link
+            to="/contact"
+            onClick={() => handleLinkClick("contact")} // Set contact as active
+            className={`${activeLink === "contact" ? "text-amber-600" : ""}`}
+          >
+            Contact
+          </Link>
+        </li>
       </ul>
 
       {/* Right: Icons */}
@@ -99,10 +150,7 @@ function Navbar() {
           <FontAwesomeIcon icon={faHeart} />
         </a>
         <div className="relative">
-          <Link
-            to="/cart"
-            className="text-xl hover:text-amber-600"
-          >
+          <Link to="/cart" className="text-xl hover:text-amber-600">
             <FontAwesomeIcon icon={faShoppingCart} />
             <span className="absolute -top-1.5 -right-2 bg-amber-600 text-white text-[10px] font-semibold rounded-full h-4 w-4 flex items-center justify-center shadow">
               0

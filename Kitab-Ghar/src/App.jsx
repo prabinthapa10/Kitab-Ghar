@@ -11,6 +11,8 @@ import UserDetails from "./pages/ProfilePage";
 import CartPage from "./pages/CartPage";
 
 import { ToastContainer } from "react-toastify";
+import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
 
 function App() {
   return (
@@ -26,6 +28,8 @@ function App() {
           <Route path="/book/:id" element={<BookDescriptionPage />} />
           <Route path="/user" element={<UserDetails />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
 
           {/* <Route path="/book_card" element={<BookCard />} /> */}
           {/* <Route path="/book/" element={<BookList />} /> */}
