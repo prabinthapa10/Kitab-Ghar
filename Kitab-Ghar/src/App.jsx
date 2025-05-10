@@ -10,6 +10,8 @@ import Book from "./pages/Book";
 import UserDetails from "./pages/ProfilePage";
 import CartPage from "./pages/CartPage";
 
+import { ToastContainer } from "react-toastify";
+
 function App() {
   return (
     <>
@@ -23,13 +25,14 @@ function App() {
           <Route path="/book" element={<Book />} />
           <Route path="/book/:id" element={<BookDescriptionPage />} />
           <Route path="/user" element={<UserDetails />} />
-          <Route path="/cart" element={<CartPage/>} />
+          <Route path="/cart" element={<CartPage />} />
 
           {/* <Route path="/book_card" element={<BookCard />} /> */}
           {/* <Route path="/book/" element={<BookList />} /> */}
           {/* <Route path="/book/:id" element={<BookDescriptionPage />} /> */}
         </Routes>
       </BrowserRouter>
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
     </>
   );
 }
