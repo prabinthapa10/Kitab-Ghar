@@ -1,15 +1,18 @@
 import { Link } from "react-router-dom";
-import { BookOpen, Search, ShoppingCart, Menu } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="bg-slate-900 text-white py-12">
-      <div className="container mx-auto px-4">
+    <footer className="bg-slate-900 text-white py-12 px-10">
+      <div className="container mx-auto px-4 md:px-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <BookOpen className="h-6 w-6 text-amber-500" />
-              <span className="font-bold text-xl">PageTurner</span>
+              <img
+                src="/assets/logo.png"
+                alt="Kitab Ghar Logo"
+                className="w-[50px] h-[50px]"
+              />
+              <span className="font-bold text-xl">Kitab Ghar</span>
             </div>
             <p className="text-slate-400">
               Your destination for literary treasures and reading adventures.
@@ -78,7 +81,6 @@ const Footer = () => {
             </address>
           </div>
         </div>
-
         <div className="border-t border-slate-800 mt-8 pt-8 text-center text-slate-400">
           <p>
             &copy; {new Date().getFullYear()} PageTurner Books. All rights
