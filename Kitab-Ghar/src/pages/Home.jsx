@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import AllBooks from "./AllBooks";
 import Footer from "../components/Footer";
@@ -6,8 +6,27 @@ import { Link } from "react-router-dom";
 import BookCard from "../components/BookCard";
 import FeaturedBooks from "../components/FeaturedBooks";
 import NewLetter from "../components/NewLetter";
+import axios from "axios";
 
 function Home() {
+  const [announcements, setAnnouncements] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    const fetchAnnouncements = async () => {
+      try {
+        const res = await axios.get("https://localhost:7195/api/Announcement");
+        setAnnouncements(res.data);
+        if (res.data.length > 0) {
+          setShowModal(true);
+        }
+      } catch (err) {
+        console.error("Error fetching announcements:", err);
+      }
+    };
+
+    fetchAnnouncements();
+  }, []);
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -46,9 +65,10 @@ function Home() {
 
       {/* products */}
       <section className="py-16 px-10 bg-white">
-        <FeaturedBooks /> 
+        <FeaturedBooks />
       </section>
 
+      {/* categroy */}
       <section className="py-16 bg-slate-50">
         <div className="container mx-auto px-6 md:px-16">
           <h2 className="text-2xl md:text-3xl font-bold mb-8 text-center">
@@ -78,6 +98,29 @@ function Home() {
 
       {/* newsletter */}
       <NewLetter />
+
+      {/* Announcements */}
+      {showModal && announcements.length > 0 && (
+        <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-transparent z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative">
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-2xl font-bold"
+              aria-label="Close announcement"
+            >
+              &times;
+            </button>
+
+            <h2 className="text-xl font-bold text-amber-600 mb-2">
+              {announcements[announcements.length - 1].title}
+            </h2>
+            <p className="text-gray-700">
+              {announcements[announcements.length - 1].message}
+            </p>
+          </div>
+        </div>
+      )}
+
       <Footer />
     </div>
   );
