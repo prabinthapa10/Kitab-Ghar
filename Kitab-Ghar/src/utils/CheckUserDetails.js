@@ -13,10 +13,10 @@ const CheckUserDetails = async (token) => {
         "Content-Type": "application/json",
       },
     });
-    const { name, role } = response.data;
-    console.log("Fetched user details:", { name, role });
+    const { id, name, role } = response.data;
+    console.log("Fetched user details:", { id, name, role });
 
-    return { name, role };
+    return { id, name, role };
   } catch (error) {
     console.error("Error fetching user details:", error);
     // Don't remove token here - let the calling code handle it
