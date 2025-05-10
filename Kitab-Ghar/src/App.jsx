@@ -7,7 +7,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Book from "./pages/Book";
-import UserDetails from "./components/UserDetail";
+import UserDetails from "./pages/ProfilePage";
 import CartPage from "./pages/CartPage";
 
 function App() {
