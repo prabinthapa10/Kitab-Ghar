@@ -147,6 +147,7 @@ export const AuthProvider = ({ children }) => {
         setToken: updateToken,
         loading,
         logout,
+        id: user?.id,
         role: user?.role,
         name: user?.name,
         isLoggedIn,
