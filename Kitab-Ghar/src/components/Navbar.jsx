@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { Search } from "lucide-react";
 
 import {
   faUser,
@@ -37,9 +38,9 @@ function Navbar() {
     <div className="bg-white shadow px-6 py-4 flex items-center justify-between">
       {/* Left: Logo */}
       <div className="flex items-center space-x-2">
-        <img src="/images/logo.png" alt="Kitab Ghar Logo" className="w-8 h-8" />
+        <img src="/assets/logo.png" alt="Kitab Ghar Logo" className="w-8 h-8" />
         <ul>
-          <li>  
+          <li>
             <Link to="/">
               <span className="text-xl font-bold border border-purple-500 px-2 rounded">
                 Kitab Ghar
@@ -85,16 +86,29 @@ function Navbar() {
             </div>
           )}
         </div>
+        <div className="relative hidden md:block">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+          <input
+            type="search"
+            placeholder="Search books..."
+            className="w-[220px] pl-10 pr-4 py-2 rounded-full bg-gray-100 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200"
+          />
+        </div>
 
-        <a href="/book">
-          <FontAwesomeIcon icon={faSearch} />
-        </a>
         <a href="#">
           <FontAwesomeIcon icon={faHeart} />
         </a>
-        <Link to="/cart">
-          <FontAwesomeIcon icon={faShoppingCart} />
-        </Link>
+        <div className="relative">
+          <Link
+            to="/cart"
+            className="text-xl hover:text-amber-600"
+          >
+            <FontAwesomeIcon icon={faShoppingCart} />
+            <span className="absolute -top-1.5 -right-2 bg-amber-600 text-white text-[10px] font-semibold rounded-full h-4 w-4 flex items-center justify-center shadow">
+              0
+            </span>
+          </Link>
+        </div>
       </div>
     </div>
   );
