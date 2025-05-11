@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import { useCart } from "../context/CartContext";
 
 const BookDescriptionPage = () => {
   const { id } = useParams();
+  const { addToCart } = useCart();
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     setLoading(true);
@@ -20,6 +24,50 @@ const BookDescriptionPage = () => {
         setLoading(false);
       });
   }, [id]);
+
+  const handleAddToCart = async () => {
+    const cartItem = {
+      bookId: book.bookId,
+      quantity: 1,
+      price: book.price,
+    };
+
+    console.log("Sending to backend:", JSON.stringify(cartItem));
+
+    try {
+      const response = await fetch("https://localhost:7195/api/CartItem", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(cartItem),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add item to cart");
+      }
+
+      const result = await response.json();
+      console.log("Saved to database:", result);
+
+      // Optional: update client cart context
+      // addToCart({
+      //   id: book.bookId,
+      //   name: book.title,
+      //   price: book.price,
+      //   image: book.image,
+      // });
+
+      setMessage("Book added to cart successfully!");
+      setTimeout(() => {
+        setMessage("");
+        navigate("/cart");
+      }, 1500);
+    } catch (err) {
+      console.error("Error saving cart item:", err);
+      setMessage("Failed to add book to cart.");
+    }
+  };
 
   if (loading) {
     return (
@@ -93,9 +141,18 @@ const BookDescriptionPage = () => {
                   </div>
 
                   <div className="flex gap-4 mb-8">
-                    <button className="px-8 py-3 bg-amber-50 hover:bg-amber-100 text-black rounded-lg  transition-colors shadow-md font-medium">
+                    <button
+                      className="px-8 py-3 bg-amber-50 hover:bg-amber-100 text-black rounded-lg  transition-colors shadow-md font-medium"
+                      onClick={handleAddToCart}
+                    >
                       Add to Cart
                     </button>
+                    {message && (
+                      <p className="mt-4 text-green-600 font-medium">
+                        {message}
+                      </p>
+                    )}
+
                     <button className="px-8 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
                       Buy Now
                     </button>
