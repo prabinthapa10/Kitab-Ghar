@@ -31,14 +31,14 @@ const AdminSidebar = () => {
     {
       label: "Dashboard",
       icon: LayoutDashboard,
-      href: "/admin/dashboard",
-      active: currentPath === "/admin/dashboard",
+      href: "/admin",
+      active: currentPath === "/admin",
     },
     {
       label: "Books Details",
       icon: Package,
-      href: "/admin/productDetails",
-      active: currentPath === "/admin/productDetails",
+      href: "/admin/bookDetails",
+      active: currentPath === "/admin/bookDetails",
     },
     {
       label: "Add Books",

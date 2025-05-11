@@ -13,6 +13,7 @@ import CartPage from "./pages/CartPage";
 import { ToastContainer } from "react-toastify";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
+import BookDetail from "./pages/Admin/BookDetail";
 
 function App() {
   return (
@@ -22,14 +23,16 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Signup />} />
-          <Route path="/admin-dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/addBook" element={<AddBook />} />
           <Route path="/book" element={<Book />} />
           <Route path="/book/:id" element={<BookDescriptionPage />} />
           <Route path="/user" element={<UserDetails />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
+
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/addBook" element={<AddBook />} />
+          <Route path="/admin/bookDetails" element={<BookDetail />} />
 
           {/* <Route path="/book_card" element={<BookCard />} /> */}
           {/* <Route path="/book/" element={<BookList />} /> */}
