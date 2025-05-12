@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import AdminSidebar from "../AdminSidebar";
+import AdminSidebar from "./AdminSidebar";
 import axios from "axios";
 
 const AnnouncementPage = () => {
@@ -10,6 +10,7 @@ const AnnouncementPage = () => {
     message: "",
     type: "general",
     announcementTime: new Date(),
+    endTime: new Date(new Date().setHours(new Date().getHours() + 1)), // Default: 1 hour later
   });
   const [announcements, setAnnouncements] = useState([]);
   const [showViewModal, setShowViewModal] = useState(false);
@@ -53,28 +54,27 @@ const AnnouncementPage = () => {
       });
     }
   };
-
   const handleSubmit = (e) => {
     e.preventDefault();
 
     const newAnnouncement = {
       ...formData,
-      announcementTime: new Date(), // Ensure proper timestamp
+      announcementTime: formData.announcementTime.toISOString(),
+      endTime: formData.endTime.toISOString(), // Include endTime
     };
 
     axios
       .post("https://localhost:7195/api/Announcement", newAnnouncement)
       .then((response) => {
         setAnnouncements([response.data, ...announcements]);
-
-        // Reset the form
+        // Reset form (including endTime)
         setFormData({
           title: "",
           message: "",
           type: "general",
           announcementTime: new Date(),
+          endTime: new Date(new Date().setHours(new Date().getHours() + 1)),
         });
-
         alert("Announcement created successfully!");
         setActiveTab("list");
       })
@@ -342,6 +342,64 @@ const AnnouncementPage = () => {
                     </p>
                   </div>
 
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      End Time (DateTimeOffset)
+                    </label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label
+                          htmlFor="endDate"
+                          className="block text-xs text-gray-500 mb-1"
+                        >
+                          Date
+                        </label>
+                        <input
+                          id="endDate"
+                          type="date"
+                          value={formatDateForInput(formData.endTime)}
+                          onChange={(e) => {
+                            const dateValue = e.target.value;
+                            if (dateValue) {
+                              const currentEndTime = formData.endTime;
+                              const newDate = new Date(dateValue);
+                              newDate.setHours(currentEndTime.getHours());
+                              newDate.setMinutes(currentEndTime.getMinutes());
+                              setFormData({ ...formData, endTime: newDate });
+                            }
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="endTime"
+                          className="block text-xs text-gray-500 mb-1"
+                        >
+                          Time
+                        </label>
+                        <input
+                          id="endTime"
+                          type="time"
+                          value={formatTimeForInput(formData.endTime)}
+                          onChange={(e) => {
+                            const timeString = e.target.value;
+                            if (timeString) {
+                              const [hours, minutes] = timeString
+                                .split(":")
+                                .map(Number);
+                              const newDate = new Date(formData.endTime);
+                              newDate.setHours(hours);
+                              newDate.setMinutes(minutes);
+                              setFormData({ ...formData, endTime: newDate });
+                            }
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="flex justify-end gap-3 pt-4">
                     <button
                       type="button"
@@ -399,6 +457,9 @@ const AnnouncementPage = () => {
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Announcement Time
                         </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          End Time
+                        </th>
                         <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Actions
                         </th>
@@ -422,9 +483,11 @@ const AnnouncementPage = () => {
                                 announcement.type.slice(1)}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {format(announcement.announcementTime, "PPP")} at{" "}
-                            {format(announcement.announcementTime, "h:mm a")}
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            {format(announcement.announcementTime, "PPpp")}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                            {format(announcement.endTime, "PPpp")}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div className="flex justify-end gap-2">
