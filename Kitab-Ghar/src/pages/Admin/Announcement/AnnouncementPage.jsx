@@ -13,10 +13,8 @@ const AnnouncementPage = () => {
   });
   const [announcements, setAnnouncements] = useState([]);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
-  const [editFormData, setEditFormData] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -91,79 +89,9 @@ const AnnouncementPage = () => {
     setShowViewModal(true);
   };
 
-  const handleEditAnnouncement = (announcement) => {
-    setSelectedAnnouncement(announcement);
-    setEditFormData({ ...announcement });
-    setShowEditModal(true);
-  };
-
   const handleDeleteAnnouncement = (announcement) => {
     setSelectedAnnouncement(announcement);
     setShowDeleteModal(true);
-  };
-
-  const handleEditFormChange = (e) => {
-    const { name, value } = e.target;
-    if (editFormData) {
-      setEditFormData({
-        ...editFormData,
-        [name]: value,
-      });
-    }
-  };
-
-  const handleEditDateChange = (e) => {
-    const dateValue = e.target.value;
-    if (dateValue && editFormData) {
-      const currentTime = editFormData.announcementTime;
-      const newDate = new Date(dateValue);
-      newDate.setHours(currentTime.getHours());
-      newDate.setMinutes(currentTime.getMinutes());
-
-      setEditFormData({
-        ...editFormData,
-        announcementTime: newDate,
-      });
-    }
-  };
-
-  const handleEditTimeChange = (e) => {
-    const timeString = e.target.value;
-    if (timeString && editFormData) {
-      const [hours, minutes] = timeString.split(":").map(Number);
-      const newDate = new Date(editFormData.announcementTime);
-      newDate.setHours(hours);
-      newDate.setMinutes(minutes);
-
-      setEditFormData({
-        ...editFormData,
-        announcementTime: newDate,
-      });
-    }
-  };
-
-  const handleSaveEdit = () => {
-    if (editFormData && selectedAnnouncement) {
-      const updatedAnnouncements = announcements.map((announcement) =>
-        announcement.id === selectedAnnouncement.id
-          ? editFormData
-          : announcement
-      );
-      setAnnouncements(updatedAnnouncements);
-      setShowEditModal(false);
-      alert("Announcement updated successfully!");
-    }
-  };
-
-  const handleConfirmDelete = () => {
-    if (selectedAnnouncement) {
-      const updatedAnnouncements = announcements.filter(
-        (announcement) => announcement.id !== selectedAnnouncement.id
-      );
-      setAnnouncements(updatedAnnouncements);
-      setShowDeleteModal(false);
-      alert("Announcement deleted successfully!");
-    }
   };
 
   const formatDateForInput = (date) => {
@@ -207,7 +135,6 @@ const AnnouncementPage = () => {
     const handleClickOutside = (e) => {
       if (e.target.classList.contains("modal-overlay")) {
         setShowViewModal(false);
-        setShowEditModal(false);
         setShowDeleteModal(false);
       }
     };
@@ -217,6 +144,25 @@ const AnnouncementPage = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  const handleConfirmDelete = async () => {
+    if (selectedAnnouncement) {
+      try {
+        await axios.delete(
+          `https://localhost:7195/api/Announcement/${selectedAnnouncement.id}`
+        );
+        const updatedAnnouncements = announcements.filter(
+          (announcement) => announcement.id !== selectedAnnouncement.id
+        );
+        setAnnouncements(updatedAnnouncements);
+        setShowDeleteModal(false);
+        alert("Announcement deleted successfully!");
+      } catch (error) {
+        console.error("Failed to delete announcement:", error);
+        alert("Error deleting announcement. Please try again.");
+      }
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -509,28 +455,6 @@ const AnnouncementPage = () => {
                               </button>
                               <button
                                 onClick={() =>
-                                  handleEditAnnouncement(announcement)
-                                }
-                                className="text-indigo-600 hover:text-indigo-900 p-1"
-                                title="Edit"
-                              >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="18"
-                                  height="18"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                                  <path d="m15 5 4 4" />
-                                </svg>
-                              </button>
-                              <button
-                                onClick={() =>
                                   handleDeleteAnnouncement(announcement)
                                 }
                                 className="text-red-600 hover:text-red-900 p-1"
@@ -574,7 +498,7 @@ const AnnouncementPage = () => {
       </div>
 
       {showViewModal && selectedAnnouncement && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 modal-overlay">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 modal-overlay">
           <div
             className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4"
             onClick={(e) => e.stopPropagation()}
@@ -628,108 +552,8 @@ const AnnouncementPage = () => {
         </div>
       )}
 
-      {showEditModal && selectedAnnouncement && editFormData && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 modal-overlay">
-          <div
-            className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-6 border-b">
-              <h3 className="text-lg font-semibold">Edit Announcement</h3>
-            </div>
-            <div className="p-6 space-y-4">
-              <div className="space-y-2">
-                <label
-                  htmlFor="edit-title"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Title
-                </label>
-                <input
-                  id="edit-title"
-                  name="title"
-                  type="text"
-                  value={editFormData.title}
-                  onChange={handleEditFormChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
-                />
-              </div>
-              <div className="space-y-2">
-                <label
-                  htmlFor="edit-type"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Type
-                </label>
-                <select
-                  id="edit-type"
-                  name="type"
-                  value={editFormData.type}
-                  onChange={handleEditFormChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
-                >
-                  <option value="general">General</option>
-                  <option value="promotion">Promotion</option>
-                  <option value="maintenance">Maintenance</option>
-                  <option value="event">Event</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Announcement Time
-                </label>
-                <div className="grid grid-cols-2 gap-4">
-                  <input
-                    type="date"
-                    value={formatDateForInput(editFormData.announcementTime)}
-                    onChange={handleEditDateChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
-                  />
-                  <input
-                    type="time"
-                    value={formatTimeForInput(editFormData.announcementTime)}
-                    onChange={handleEditTimeChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label
-                  htmlFor="edit-message"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Message
-                </label>
-                <textarea
-                  id="edit-message"
-                  name="message"
-                  value={editFormData.message}
-                  onChange={handleEditFormChange}
-                  rows={6}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
-                />
-              </div>
-            </div>
-            <div className="p-4 border-t flex justify-end space-x-3">
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveEdit}
-                className="px-4 py-2 bg-black text-white rounded-md hover:bg-blue-700"
-              >
-                Save Changes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {showDeleteModal && selectedAnnouncement && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 modal-overlay">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 modal-overlay">
           <div
             className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4"
             onClick={(e) => e.stopPropagation()}
