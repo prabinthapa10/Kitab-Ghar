@@ -16,37 +16,30 @@ function Home() {
   // Slider settings
   const sliderSettings = {
     dots: false,
-    infinite: true, // Loop infinitely
-    speed: 500, // Transition speed (ms)
-    slidesToShow: 1, // Show one announcement at a time
-    slidesToScroll: 1, // Scroll one at a time
-    autoplay: true, // Auto-rotate announcements
-    autoplaySpeed: 5000, // Change every 5 seconds
+    infinite: announcements.length > 1,
+    speed: 500, 
+    slidesToShow: 1, 
+    slidesToScroll: 1, 
+    autoplay: true, 
+    autoplaySpeed: 5000,
+    arrows: false,
   };
 
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
         const res = await axios.get("https://localhost:7195/api/Announcement");
-        setAnnouncements(res.data);
-        if (res.data.length > 0) {
-          setShowBanner(true);
-        }
-      } catch (err) {
-        console.error("Error fetching announcements:", err);
-      }
-    };
-    fetchAnnouncements();
-  }, []);
+        const now = new Date();
 
-  useEffect(() => {
-    const fetchAnnouncements = async () => {
-      try {
-        const res = await axios.get("https://localhost:7195/api/Announcement");
-        setAnnouncements(res.data);
-        if (res.data.length > 0) {
-          setShowModal(true);
-        }
+        // Filter only currently active announcements
+        const activeAnnouncements = res.data.filter((a) => {
+          const start = new Date(a.announcementTime);
+          const end = new Date(a.endTime);
+          return now >= start && now <= end;
+        });
+
+        setAnnouncements(activeAnnouncements);
+        setShowBanner(activeAnnouncements.length > 0);
       } catch (err) {
         console.error("Error fetching announcements:", err);
       }
@@ -54,6 +47,8 @@ function Home() {
 
     fetchAnnouncements();
   }, []);
+
+  console.log(announcements);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -70,12 +65,12 @@ function Home() {
             ✕
           </button>
 
-          <div className="container mx-auto">
+          <div className="w-full px-4">
             {/* Slider */}
             <Slider {...sliderSettings} className="w-full z-0">
               {announcements.map((announcement) => (
-                <div key={announcement.id} className="px-4 text-center">
-                  <span className="font-medium">
+                <div key={announcement.id} className="w-full text-center">
+                  <span className="font-medium block">
                     📢 {announcement.title}: {announcement.message}
                   </span>
                 </div>
