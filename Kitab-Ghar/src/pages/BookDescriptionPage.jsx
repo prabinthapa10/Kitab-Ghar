@@ -26,37 +26,52 @@ const BookDescriptionPage = () => {
   }, [id]);
 
   const handleAddToCart = async () => {
-    const cartItem = {
-      bookId: book.bookId,
-      quantity: 1,
-      price: book.price,
-    };
-
-    console.log("Sending to backend:", JSON.stringify(cartItem));
-
     try {
-      const response = await fetch("https://localhost:7195/api/CartItem", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(cartItem),
-      });
+      // Step 1: Fetch existing cart items
+      const cartRes = await fetch("https://localhost:7195/api/CartItem");
+      const cartItems = await cartRes.json();
 
-      if (!response.ok) {
-        throw new Error("Failed to add item to cart");
+      const existingItem = cartItems.find(
+        (item) => item.bookId === book.bookId
+      );
+
+      let response;
+
+      if (existingItem) {
+        // Step 2: If item exists, update the quantity
+        const updatedItem = {
+          ...existingItem,
+          quantity: existingItem.quantity + 1,
+        };
+
+        response = await fetch(
+          `https://localhost:7195/api/CartItem/${existingItem.id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(updatedItem),
+          }
+        );
+      } else {
+        // Step 3: If item doesn't exist, add new item
+        const newItem = {
+          bookId: book.bookId,
+          quantity: 1,
+          price: book.price,
+        };
+
+        response = await fetch("https://localhost:7195/api/CartItem", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newItem),
+        });
       }
 
-      const result = await response.json();
-      console.log("Saved to database:", result);
-
-      // Optional: update client cart context
-      // addToCart({
-      //   id: book.bookId,
-      //   name: book.title,
-      //   price: book.price,
-      //   image: book.image,
-      // });
+      if (!response.ok) throw new Error("Failed to update/add item");
 
       setMessage("Book added to cart successfully!");
       setTimeout(() => {
