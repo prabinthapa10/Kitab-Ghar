@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import AdminSidebar from "../AdminSidebar";
+import AdminSidebar from "./AdminSidebar";
 import axios from "axios";
 
 const AnnouncementPage = () => {

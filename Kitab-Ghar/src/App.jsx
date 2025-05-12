@@ -14,7 +14,7 @@ import { ToastContainer } from "react-toastify";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import BookDetail from "./pages/Admin/BookDetail";
-import AnnouncementPage from "./pages/Admin/Announcement/AnnouncementPage";
+import AnnouncementPage from "./pages/Admin/AnnouncementPage";
 
 function App() {
   return (
