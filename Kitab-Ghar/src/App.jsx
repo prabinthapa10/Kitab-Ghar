@@ -15,6 +15,8 @@ import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import BookDetail from "./pages/Admin/BookDetail";
 import AnnouncementPage from "./pages/Admin/AnnouncementPage";
+import PublicRoutes from "./routes/PublicRoutes";
+import ProtectedRoutes from "./routes/ProtectedRoutes";
 
 function App() {
   return (
@@ -77,15 +79,17 @@ function App() {
               </PublicRoutes>
             }
           />
-
+          <Route element={<ProtectedRoutes roles={["Member"]} />}>
             <Route path="/user" element={<UserDetails />} />
             <Route path="/cart" element={<CartPage />} />
+          </Route>
 
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/addBook" element={<AddBook />} />
-          <Route path="/admin/bookDetails" element={<BookDetail />} />
-          <Route path="/admin/announcements" element={<AnnouncementPage />} />
-
+          <Route element={<ProtectedRoutes roles={["Admin"]} />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/addBook" element={<AddBook />} />
+            <Route path="/admin/bookDetails" element={<BookDetail />} />
+            <Route path="/admin/announcements" element={<AnnouncementPage />} />
+          </Route>
           {/* <Route path="/book_card" element={<BookCard />} /> */}
           {/* <Route path="/book/" element={<BookList />} /> */}
           {/* <Route path="/book/:id" element={<BookDescriptionPage />} /> */}
