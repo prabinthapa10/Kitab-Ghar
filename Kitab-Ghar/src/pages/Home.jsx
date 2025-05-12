@@ -27,6 +27,7 @@ function Home() {
 
     fetchAnnouncements();
   }, []);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -112,7 +113,7 @@ function Home() {
             </button>
 
             <h2 className="text-xl font-bold text-amber-600 mb-2">
-              {announcements[announcements.length - 1].title}
+              {announcements[announcements.length - 1].title || "Announcment"}
             </h2>
             <p className="text-gray-700">
               {announcements[announcements.length - 1].message}

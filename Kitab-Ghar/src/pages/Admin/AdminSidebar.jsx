@@ -7,11 +7,14 @@ import {
   Gift,
   User,
   Menu,
+  Megaphone,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const AdminSidebar = () => {
   const [currentPath, setCurrentPath] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setCurrentPath(window.location.pathname);
@@ -31,38 +34,38 @@ const AdminSidebar = () => {
     {
       label: "Dashboard",
       icon: LayoutDashboard,
-      href: "/admin",
+      path: "/admin",
       active: currentPath === "/admin",
     },
     {
       label: "Books Details",
       icon: Package,
-      href: "/admin/bookDetails",
+      path: "/admin/bookDetails",
       active: currentPath === "/admin/bookDetails",
     },
     {
       label: "Add Books",
       icon: PlusCircle,
-      href: "/admin/addBook",
+      path: "/admin/addBook",
       active: currentPath === "/admin/addBook",
     },
     {
       label: "Reviews",
       icon: MessageSquare,
-      href: "/admin/reviews",
+      path: "/admin/reviews",
       active: currentPath === "/admin/reviews",
     },
     {
       label: "Orders",
       icon: Gift,
-      href: "/admin/orders",
+      path: "/admin/orders",
       active: currentPath === "/admin/orders",
     },
     {
-      label: "Profile",
-      icon: User,
-      href: "/admin/profile",
-      active: currentPath === "/admin/profile",
+      label: "Announcements",
+      icon: Megaphone,
+      path: "/admin/announcements",
+      active: currentPath === "/admin/announcements",
     },
   ];
 
@@ -92,21 +95,24 @@ const AdminSidebar = () => {
         `}
       >
         <div className="flex h-14 items-center border-b px-4 lg:h-[60px]">
-          <a
-            href="/admin/dashboard"
+          <button
+            onClick={() => navigate("/admin/")}
             className="flex items-center gap-2 font-semibold"
           >
             <Package className="h-6 w-6" />
             <span>Admin Panel</span>
-          </a>
+          </button>
         </div>
         <div className="flex-1">
           <nav className="grid gap-1 p-2">
             {routes.map((route) => (
-              <a
-                key={route.href}
-                href={route.href}
-                className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+              <button
+                key={route.path}
+                onClick={() => {
+                  navigate(route.path);
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`flex items-center gap-2 w-full text-left rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                   route.active
                     ? "bg-gray-200 text-gray-900"
                     : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
@@ -114,7 +120,7 @@ const AdminSidebar = () => {
               >
                 <route.icon className="h-4 w-4" />
                 {route.label}
-              </a>
+              </button>
             ))}
           </nav>
         </div>

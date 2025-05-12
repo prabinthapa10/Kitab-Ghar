@@ -14,8 +14,7 @@ import { ToastContainer } from "react-toastify";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import BookDetail from "./pages/Admin/BookDetail";
-import PublicRoutes from "./routes/PublicRoutes";
-import ProtectedRoutes from "./routes/ProtectedRoutes";
+import AnnouncementPage from "./pages/Admin/Announcement/AnnouncementPage";
 
 function App() {
   return (
@@ -79,16 +78,13 @@ function App() {
             }
           />
 
-          <Route element={<ProtectedRoutes roles={["Member"]} />}>
             <Route path="/user" element={<UserDetails />} />
             <Route path="/cart" element={<CartPage />} />
-          </Route>
 
-          <Route element={<ProtectedRoutes roles={["Admin"]} />}>
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/addBook" element={<AddBook />} />
-            <Route path="/admin/bookDetails" element={<BookDetail />} />
-          </Route>
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/addBook" element={<AddBook />} />
+          <Route path="/admin/bookDetails" element={<BookDetail />} />
+          <Route path="/admin/announcements" element={<AnnouncementPage />} />
 
           {/* <Route path="/book_card" element={<BookCard />} /> */}
           {/* <Route path="/book/" element={<BookList />} /> */}
