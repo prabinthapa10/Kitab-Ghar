@@ -5,6 +5,7 @@ import ActionMenu from "./ActionMenu";
 import ViewBookModal from "./ViewBookModal";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import DiscountModel from "./DiscountModel";
+import { toast } from "react-toastify";
 
 export default function BookDetail() {
   const [books, setBooks] = useState([]);
@@ -18,11 +19,13 @@ export default function BookDetail() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [discounts, setDiscounts] = useState([]);
+  const [discountPercent, setDiscountPercent] = useState("");
 
   // Add this function inside your component
   const hasDiscount = (bookId) => {
     return discounts.some((discount) => discount.bookId === bookId);
   };
+
   // Fetch books
   const fetchBooks = () => {
     setIsLoading(true);
@@ -41,26 +44,8 @@ export default function BookDetail() {
       });
   };
 
-  const fetchDiscounts = () => {
-    setIsLoading(true);
-    setError(null);
-
-    axios
-      .get("https://localhost:7195/api/Discount")
-      .then((response) => {
-        setDiscounts(response.data);
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching discounts:", error);
-        setError("Failed to load discounts. Please try again later.");
-        setIsLoading(false);
-      });
-  };
-
   useEffect(() => {
     fetchBooks();
-    fetchDiscounts();
   }, []);
 
   // Filter books based on search term
@@ -82,6 +67,8 @@ export default function BookDetail() {
     setShowViewModal(true);
   };
 
+  console.log("current", currentBooks);
+
   // Handle edit book
   const handleEditBook = (bookId) => {
     console.log("Editing book with ID:", bookId);
@@ -89,44 +76,42 @@ export default function BookDetail() {
   };
 
   // Handle set discount
-  const handleSetDiscount = (book) => {
-    setSelectedBook(book);
-    setShowDiscountModal(true);
-  };
-
-  // Confirm and apply discount
-  const confirmSetDiscount = (bookId, discountData) => {
-    if (!bookId) return;
-
+  const handleSetDiscount = (bookId, discountData) => {
     setIsLoading(true);
 
-    const discountDTO = {
-      bookId: bookId,
-      discountPercent: parseFloat(discountData.discountPercent),
-      discountStart: new Date(discountData.discountStart).toISOString(),
-      discountEnd: new Date(discountData.discountEnd).toISOString(),
-      onSale: discountData.onSale,
-    };
+    // Calculate the discounted price
+    const discountPercentage = parseFloat(discountData.discountPercent);
+    const bookToUpdate = books.find((book) => book.bookId === bookId);
 
-    // Call the discount API endpoint
-    axios
-      .post("https://localhost:7195/api/Discount", discountDTO)
-      .then((response) => {
-        console.log("Discount set successfully:", response.data);
+    if (bookToUpdate) {
+      const discountedPrice =
+        bookToUpdate.price - (bookToUpdate.price * discountPercentage) / 100;
 
-        fetchBooks();
+      // Add the discounted price to the discountData
+      const updatedDiscountData = { discountedPrice: discountedPrice };
 
-        setShowDiscountModal(false);
-        setSelectedBook(null);
-        setIsLoading(false);
-
-        alert("Discount applied successfully!");
-      })
-      .catch((error) => {
-        console.error("Error setting discount:", error);
-        setError("Failed to set discount. Please try again.");
-        setIsLoading(false);
-      });
+      axios
+        .patch(
+          `https://localhost:7195/api/Books/${bookId}/discount`,
+          updatedDiscountData
+        )
+        .then((response) => {
+          console.log("Discount applied successfully:", response.data);
+          fetchBooks(); // Reload the books data
+          setShowDiscountModal(false);
+          setSelectedBook(null); // Clear selected book
+          setIsLoading(false);
+          toast.success("Discount applied successfully!");
+        })
+        .catch((error) => {
+          console.error("Error applying discount:", error);
+          setError("Failed to apply discount. Please try again.");
+          setIsLoading(false);
+        });
+    } else {
+      console.error("Book not found!");
+      setIsLoading(false);
+    }
   };
 
   // Handle delete book
@@ -198,6 +183,7 @@ export default function BookDetail() {
     return buttons;
   };
 
+  console.log(books);
   return (
     <div className="flex min-h-screen bg-gray-100">
       <AdminSidebar />
@@ -242,8 +228,8 @@ export default function BookDetail() {
                 <th className="p-2">Price</th>
                 <th className="p-2">Availability</th>
                 <th className="p-2">ISBN</th>
-                <th className="p-2">Actions</th>
                 <th className="p-2">On Sale</th>
+                <th className="p-2">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -278,23 +264,27 @@ export default function BookDetail() {
                     </td>
                     <td className="p-2">{book.isbn}</td>
                     <td className="p-2">
-                      {hasDiscount(book.bookId) ? (
-                        <span className="px-2 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">
-                          On Sale
-                        </span>
-                      ) : (
+                      {book.discountedPrice === 0 ? (
                         <span className="px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
                           Regular
                         </span>
+                      ) : (
+                        <span className="px-2 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">
+                          On sale
+                        </span>
                       )}
                     </td>
+
                     <td className="p-2 text-center">
                       <span className="cursor-pointer text-xl">
                         <ActionMenu
                           onView={() => handleViewBook(book)}
                           onEdit={() => handleEditBook(book.bookId)}
                           onDelete={() => handleDeleteBook(book)}
-                          onSetDiscount={() => handleSetDiscount(book)}
+                          onSetDiscount={() => {
+                            setSelectedBook(book);
+                            setShowDiscountModal(true); // Show the discount modal
+                          }}
                         />
                       </span>
                     </td>
@@ -343,8 +333,9 @@ export default function BookDetail() {
           bookId={selectedBook.bookId}
           book={selectedBook}
           onClose={() => setShowDiscountModal(false)}
-          onSetDiscount={confirmSetDiscount}
+          onSetDiscount={handleSetDiscount}
           isLoading={isLoading}
+          setDiscountPercent={setDiscountPercent}
         />
       )}
 

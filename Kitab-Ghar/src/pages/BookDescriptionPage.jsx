@@ -16,7 +16,7 @@ const BookDescriptionPage = () => {
   const [bookmarked, setBookmarked] = useState(false);
   const navigate = useNavigate();
 
-  const {id:userId} = useAuth();
+  const { id: userId } = useAuth();
 
   useEffect(() => {
     setLoading(true);
@@ -185,6 +185,7 @@ const BookDescriptionPage = () => {
     description,
     image,
     price,
+    discountedPrice,
   } = book;
 
   return (
@@ -202,6 +203,11 @@ const BookDescriptionPage = () => {
                     alt={title}
                     className="w-full h-full object-cover"
                   />
+                  {discountedPrice && (
+                    <div className="absolute top-3 left-3 bg-red-500 text-white text-sm font-semibold px-3 py-1 rounded-full">
+                      On Sale
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -224,9 +230,20 @@ const BookDescriptionPage = () => {
                   <p className="text-xl text-black mb-6">by {author}</p>
 
                   <div className="mb-8">
-                    <span className="text-3xl font-bold text-gray-900">
-                      ₹{price}
-                    </span>
+                    {discountedPrice ? (
+                      <>
+                        <span className="text-3xl font-bold text-gray-900">
+                          Rs {discountedPrice}
+                        </span>
+                        <span className="text-xl text-gray-400 line-through ml-3">
+                          Rs {price}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-3xl font-bold text-gray-900">
+                        Rs {price}
+                      </span>
+                    )}
                   </div>
 
                   <div className="flex gap-4 mb-8">

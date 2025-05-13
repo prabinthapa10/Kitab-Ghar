@@ -90,6 +90,7 @@ const AllBooks = ({ filters = {} }) => {
     setCurrentPage(pageNumber);
   };
 
+  console.log(currentBooks)
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 py-4">
@@ -108,7 +109,7 @@ const AllBooks = ({ filters = {} }) => {
                   title={book.title}
                   genre={book.genre}
                   price={book.price}
-                  discount={discount}
+                  priceAfterDiscount={book.discountedPrice}
                 />
               </div>
             );

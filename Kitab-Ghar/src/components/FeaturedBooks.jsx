@@ -59,7 +59,7 @@ function FeaturedBooks() {
     dots: false,
     infinite: true,
     speed: 500,
-    slidesToShow: 4 ,
+    slidesToShow: 4,
     slidesToScroll: 1,
     nextArrow: <NextArrow />,
     prevArrow: <PrevArrow />,
@@ -96,7 +96,7 @@ function FeaturedBooks() {
                     title={book.title}
                     genre={book.genre}
                     price={book.price}
-                    discount={book.discount}
+                    priceAfterDiscount={book.discountedPrice}
                   />
                 </div>
               </div>
