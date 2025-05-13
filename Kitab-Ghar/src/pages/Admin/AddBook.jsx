@@ -4,7 +4,6 @@ import axios from "axios";
 
 const AddBook = () => {
   const [book, setBook] = useState({
-    bookid: "",
     title: "",
     author: "",
     genre: "",
@@ -116,65 +115,92 @@ const AddBook = () => {
 
           {/* Basic Information */}
           {activeTab === "basic" && (
-            <div className="bg-white p-6 rounded shadow space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <input
-                  name="bookid"
-                  value={book.bookid}
+            <div className="bg-white p-8 rounded-lg shadow-md space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="flex flex-col md:col-span-2">
+                  <label className="mb-1 text-sm font-medium text-gray-700">
+                    ISBN
+                  </label>
+                  <input
+                    type="text"
+                    name="ISBN"
+                    value={book.ISBN}
+                    onChange={handleChange}
+                    placeholder="Enter ISBN"
+                    className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                  />
+                </div>
+
+                <div className="flex flex-col md:col-span-2">
+                  <label className="mb-1 text-sm font-medium text-gray-700">
+                    Title <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={book.title}
+                    onChange={handleChange}
+                    placeholder="Enter Book Title"
+                    className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="mb-1 text-sm font-medium text-gray-700">
+                    Author <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="author"
+                    value={book.author}
+                    onChange={handleChange}
+                    placeholder="Enter Author Name"
+                    className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div className="flex flex-col">
+                  <label className="mb-1 text-sm font-medium text-gray-700">
+                    Publisher
+                  </label>
+                  <input
+                    type="text"
+                    name="publishers"
+                    value={book.publishers}
+                    onChange={handleChange}
+                    placeholder="Enter Publisher Name"
+                    className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col">
+                <label className="mb-1 text-sm font-medium text-gray-700">
+                  Description
+                </label>
+                <textarea
+                  name="description"
+                  value={book.description}
                   onChange={handleChange}
-                  placeholder="Book ID"
-                  className="border p-2 rounded"
-                />
-                <input
-                  name="ISBN"
-                  value={book.ISBN}
-                  onChange={handleChange}
-                  placeholder="ISBN"
-                  className="border p-2 rounded"
-                />
-                <input
-                  name="title"
-                  value={book.title}
-                  onChange={handleChange}
-                  placeholder="Title"
-                  className="border p-2 rounded col-span-2"
-                  required
-                />
-                <input
-                  name="author"
-                  value={book.author}
-                  onChange={handleChange}
-                  placeholder="Author"
-                  className="border p-2 rounded"
-                  required
-                />
-                <input
-                  name="publishers"
-                  value={book.publishers}
-                  onChange={handleChange}
-                  placeholder="Publisher"
-                  className="border p-2 rounded"
+                  placeholder="Write a brief description of the book..."
+                  className="border border-gray-300 p-3 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent min-h-[8rem]"
                 />
               </div>
-              <textarea
-                name="description"
-                value={book.description}
-                onChange={handleChange}
-                placeholder="Description"
-                className="border p-2 rounded w-full min-h-[8rem]"
-              />
-              <div className="flex justify-between">
+
+              <div className="flex justify-between pt-2">
                 <button
                   type="button"
                   onClick={() => window.history.back()}
-                  className="border px-4 py-2 rounded"
+                  className="px-5 py-2 rounded-lg border border-gray-400 text-gray-700 hover:bg-gray-100 transition duration-200"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveTab("details")}
-                  className="bg-black text-white px-4 py-2 rounded"
+                  className="px-5 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition duration-200"
                 >
                   Next
                 </button>
@@ -195,9 +221,10 @@ const AddBook = () => {
                   <option value="">Select Genre</option>
                   <option value="fiction">Fiction</option>
                   <option value="non-fiction">Non-Fiction</option>
-                  <option value="sci-fi">Sci-Fi</option>
-                  <option value="fantasy">Fantasy</option>
-                  <option value="mystery">Mystery</option>
+                  <option value="non-fiction">Mystery</option>
+                  <option value="science-fiction">Science Fiction</option>
+                  <option value="fantasy">Romance</option>
+                  <option value="mystery">Biography</option>
                 </select>
                 <select
                   name="format"
@@ -217,22 +244,11 @@ const AddBook = () => {
                   className="border p-2 rounded"
                 >
                   <option value="">Select Language</option>
+                  <option value="nepali">Nepali</option>
                   <option value="english">English</option>
+                  <option value="hindi">Hindi</option>
                   <option value="spanish">Spanish</option>
                   <option value="french">French</option>
-                  <option value="german">German</option>
-                  <option value="italian">Italian</option>
-                  <option value="portuguese">Portuguese</option>
-                  <option value="chinese">Chinese</option>
-                  <option value="japanese">Japanese</option>
-                  <option value="korean">Korean</option>
-                  <option value="russian">Russian</option>
-                  <option value="arabic">Arabic</option>
-                  <option value="hindi">Hindi</option>
-                  <option value="bengali">Bengali</option>
-                  <option value="turkish">Turkish</option>
-                  <option value="dutch">Dutch</option>
-                  <option value="swedish">Swedish</option>
                 </select>
                 <input
                   type="number"
