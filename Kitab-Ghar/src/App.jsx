@@ -39,12 +39,12 @@ function App() {
           <Route path="/admin/addBook" element={<AddBook />} />
           <Route path="/admin/bookDetails" element={<BookDetail />} />
 
-          {/* <Route element={<ProtectedRoutes roles={["Admin"]} />}> */}
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/addBook" element={<AddBook />} />
-          <Route path="/admin/bookDetails" element={<BookDetail />} />
-          <Route path="/admin/announcements" element={<AnnouncementPage />} />
-          {/* </Route> */}
+          <Route element={<ProtectedRoutes roles={["Admin"]} />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/addBook" element={<AddBook />} />
+            <Route path="/admin/bookDetails" element={<BookDetail />} />
+            <Route path="/admin/announcements" element={<AnnouncementPage />} />
+          </Route>
           {/* <Route path="/book_card" element={<BookCard />} /> */}
           {/* <Route path="/book/" element={<BookList />} /> */}
           {/* <Route path="/book/:id" element={<BookDescriptionPage />} /> */}

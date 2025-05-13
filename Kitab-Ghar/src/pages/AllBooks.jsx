@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import BookCard from "../components/BookCard";
 import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
 
 const AllBooks = ({ filters = {} }) => {
   const [books, setBooks] = useState([]);
+  const [discounts, setDiscounts] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -56,35 +58,56 @@ const AllBooks = ({ filters = {} }) => {
     fetchBooks();
   }, [location.search, filters]);
 
+  useEffect(() => {
+    const fetchDiscounts = async () => {
+      try {
+        const res = await axios.get("https://localhost:7195/api/Discount");
+        setDiscounts(res.data);
+      } catch (err) {
+        console.error("Error fetching discounts:", err);
+      }
+    };
+
+    fetchDiscounts();
+  }, []);
+
+  const getDiscountForBook = (bookId) => {
+    const discount = discounts.find((d) => d.bookId === bookId && d.onSale);
+    return discount ? discount : null;
+  };
+
+  console.log(discounts);
+
   return (
-    <>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 py-4">
-          {books.length > 0 ? (
-            books.map((book) => (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 py-4">
+        {books.length > 0 ? (
+          books.map((book) => {
+            const discount = getDiscountForBook(book.bookId); // Get the discount for the current book
+            return (
               <div
                 key={book.bookId}
                 onClick={() => navigate(`/book/${book.bookId}`)}
                 className="p-0 bg-white rounded-lg overflow-hidden shadow-md transition-all duration-300 cursor-pointer"
               >
                 <BookCard
-                  id={book.bookId}
+                  id={book.bookId} // Pass the correct bookId
                   image={book.image}
                   title={book.title}
                   genre={book.genre}
                   price={book.price}
-                  discount={book.discount}
+                  discount={discount}
                 />
               </div>
-            ))
-          ) : (
-            <div className="col-span-full text-center py-8">
-              <p className="text-lg text-muted-foreground">No books found.</p>
-            </div>
-          )}
-        </div>
+            );
+          })
+        ) : (
+          <div className="col-span-full text-center py-8">
+            <p className="text-lg text-muted-foreground">No books found.</p>
+          </div>
+        )}
       </div>
-    </>
+    </div>
   );
 };
 
