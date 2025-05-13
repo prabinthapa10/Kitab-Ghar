@@ -3,17 +3,30 @@ import { Trash2 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function CartPage() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchCartItems();
+    }
+  }, [user]);
 
   const fetchCartItems = async () => {
     try {
       const token = localStorage.getItem("token");
 
-      // Step 1: Fetch cart items
-      const cartRes = await axios.get("https://localhost:7195/api/CartItem", {
+      if (!user?.id) {
+        throw new Error("User not logged in.");
+      }
+
+      const cartRes = await axios.get(`https://localhost:7195/api/CartItem`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -21,7 +34,6 @@ export default function CartPage() {
 
       const items = cartRes.data;
 
-      // Step 2: Fetch book details for each cart item
       const enrichedItems = await Promise.all(
         items.map(async (item) => {
           try {
@@ -46,10 +58,6 @@ export default function CartPage() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchCartItems();
-  }, []);
 
   const updateQuantity = async (id, quantity) => {
     if (quantity < 1) return;
@@ -77,6 +85,67 @@ export default function CartPage() {
     }
   };
 
+  const Checkout = async () => {
+    try {
+      if (!user?.id) {
+        throw new Error("User is not authenticated");
+      }
+
+      const totalAmount = cartItems.reduce(
+        (total, item) => total + item.price * item.quantity,
+        0
+      );
+
+      const orderPayload = {
+        userId: user.id,
+        status: "Pending",
+        totalAmount,
+        date: new Date().toISOString(),
+      };
+
+      // Step 1: Create the order
+      const orderRes = await fetch("https://localhost:7195/api/Order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderPayload),
+      });
+
+      if (!orderRes.ok) {
+        const errorData = await orderRes.json();
+        console.error("Order creation error:", errorData);
+        throw new Error("Failed to create order");
+      }
+
+      const createdOrder = await orderRes.json();
+      const orderId = createdOrder.id;
+
+      // Step 2: Create order items
+      for (const item of cartItems) {
+        const itemPayload = {
+          orderId,
+          bookId: item.bookId || item.id, // ensure you pass correct book ID
+          quantity: item.quantity,
+        };
+
+        const itemRes = await fetch("https://localhost:7195/api/OrderItem", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(itemPayload),
+        });
+
+        if (!itemRes.ok) {
+          const itemError = await itemRes.json();
+          console.error("OrderItem creation failed:", itemError);
+          throw new Error("Failed to create order item");
+        }
+      }
+
+      // Step 3: Navigate to confirmation/order details page
+      navigate(`/order/${orderId}`);
+    } catch (err) {
+      console.error("Checkout failed:", err.message);
+    }
+  };
   const subtotal = (item) => item.book?.price * item.quantity;
   const total = cartItems.reduce(
     (sum, item) => sum + (item.book?.price || 0) * item.quantity,
@@ -172,7 +241,10 @@ export default function CartPage() {
                 </span>
               </div>
 
-              <button className="w-full border border-gray-300 rounded py-3 px-4 hover:bg-gray-50 transition">
+              <button
+                className="w-full border border-gray-300 rounded py-3 px-4 hover:bg-gray-50 transition"
+                onClick={Checkout}
+              >
                 Check Out
               </button>
             </div>

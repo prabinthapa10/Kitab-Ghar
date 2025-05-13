@@ -195,7 +195,7 @@ const AddBook = () => {
                   <option value="">Select Genre</option>
                   <option value="fiction">Fiction</option>
                   <option value="non-fiction">Non-Fiction</option>
-                  <option value="science-fiction">Science Fiction</option>
+                  <option value="sci-fi">Sci-Fi</option>
                   <option value="fantasy">Fantasy</option>
                   <option value="mystery">Mystery</option>
                 </select>
