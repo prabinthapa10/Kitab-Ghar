@@ -4,6 +4,7 @@ import axios from "axios";
 import { useAuth } from "../Context/AuthContext";
 import Navbar from "../components/Navbar";
 import { toast } from "react-toastify";
+import getUserDetails from "../utils/CheckUserDetails";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -11,7 +12,7 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const { setToken, setIsLoggedIn } = useAuth();
+  const { setToken, setIsLoggedIn, setUser } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -29,8 +30,22 @@ function Login() {
       setToken(token);
       setIsLoggedIn(true);
 
-      toast.success("Login successful!");
-      setTimeout(() => navigate("/"), 100);
+      const userDetails = await getUserDetails(token);
+
+      setUser(userDetails);
+      if (userDetails?.role === "Admin") {
+        toast.success("Login successful!");
+        toast.info("Redirecting to Admin Dashboard...");
+        navigate("/admin");
+      } else if (userDetails?.role === "Member") {
+        toast.success("Login successful!");
+        toast.info("Redirecting to Home...");
+        setTimeout(() => navigate("/"), 100);
+        navigate("/");
+      } else {
+        toast.warn("Unrecognized role.");
+        setTimeout(() => navigate("/"), 100);
+      }
     } catch (err) {
       console.error("Login error:", err.response?.data || err.message);
       setError(err.response?.data || "Login failed.");
