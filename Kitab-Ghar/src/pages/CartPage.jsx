@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function CartPage() {
   const [cartItems, setCartItems] = useState([]);
@@ -26,7 +27,6 @@ export default function CartPage() {
         throw new Error("User not logged in.");
       }
 
-      // Step 1: Fetch all carts and get the logged-in user's cart
       const cartRes = await axios.get("https://localhost:7195/api/Cart", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -42,7 +42,6 @@ export default function CartPage() {
         return;
       }
 
-      // Step 2: Fetch all cart items
       const cartItemRes = await axios.get(
         "https://localhost:7195/api/CartItem",
         {
@@ -54,12 +53,10 @@ export default function CartPage() {
 
       const allItems = cartItemRes.data;
 
-      // Step 3: Filter items belonging to the user's cart
       const userCartItems = allItems.filter(
         (item) => item.cartId === userCart.id
       );
 
-      // Step 4: Enrich each item with book details
       const enrichedItems = await Promise.all(
         userCartItems.map(async (item) => {
           try {
@@ -77,22 +74,6 @@ export default function CartPage() {
         })
       );
 
-      // Debug logs
-      console.log("User ID:", user.userId);
-      console.log("User's cart ID:", userCart.id);
-      console.log("Filtered cart items:", userCartItems);
-      console.log("Cart items from API:", cartItemRes.data);
-
-      // console.log(
-      //   "Checking match: item.cartId:",
-      //   typeof item.cartId,
-      //   item.cartId,
-      //   "vs",
-      //   typeof userCart.id,
-      //   userCart.id
-      // );
-
-      // Step 5: Set state
       setCartItems(enrichedItems);
     } catch (err) {
       console.error("Error fetching cart items:", err);
@@ -129,46 +110,61 @@ export default function CartPage() {
 
   const Checkout = async () => {
     try {
-      if (!user?.id) throw new Error("User is not authenticated");
+      const token = localStorage.getItem("token");
 
-      const totalAmount = cartItems.reduce(
-        (total, item) => total + (item.book?.price || 0) * item.quantity,
-        0
-      );
+      const orderRes = await fetch("https://localhost:7195/api/Order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user.userId,
+          status: "Pending",
+          totalAmount: parseFloat(total.toFixed(2)),
+          date: new Date().toISOString(),
+        }),
+      });
 
-      const orderPayload = {
-        userId: user.id,
-        status: "Pending",
-        totalAmount,
-        date: new Date().toISOString(),
-      };
-      const orderRes = await axios.post(
-        "https://localhost:7195/api/Order",
-        orderPayload
-      );
-
-      const createdOrder = orderRes.data;
-      const orderId = createdOrder.id;
+      if (!orderRes.ok) throw new Error("Failed to create order");
+      const order = await orderRes.json();
 
       for (const item of cartItems) {
-        const itemPayload = {
-          orderId,
-          bookId: item.bookId,
-          quantity: item.quantity,
-        };
-
-        await axios.post("https://localhost:7195/api/OrderItem", itemPayload);
+        await fetch("https://localhost:7195/api/OrderItem", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            bookId: item.bookId,
+            quantity: item.quantity,
+            orderId: order.id,
+          }),
+        });
       }
 
-      navigate(`/order/${orderId}`);
+      for (const item of cartItems) {
+        await fetch(`https://localhost:7195/api/CartItem/${item.id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      }
+
+      toast.success("Order placed successfully!");
+      setCartItems([]);
+      navigate(`/orderSuccess/${order.id}`);
     } catch (err) {
-      console.error("Checkout failed:", err.message);
+      console.error("Checkout failed", err);
+      toast.error("Checkout failed");
     }
   };
 
   const subtotal = (item) => (item.book?.price || 0) * item.quantity;
   const total = cartItems.reduce((sum, item) => sum + subtotal(item), 0);
 
+  console.log("total0", total);
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />

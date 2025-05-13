@@ -18,6 +18,8 @@ import BookDetail from "./pages/Admin/BookDetail";
 import AnnouncementPage from "./pages/Admin/AnnouncementPage";
 import PublicRoutes from "./routes/PublicRoutes";
 import ProtectedRoutes from "./routes/ProtectedRoutes";
+import OrderSuccess from "./pages/OrderSuccess";
+import OrderHistory from "./pages/OrderHistory";
 
 function App() {
   return (
@@ -38,6 +40,8 @@ function App() {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/addBook" element={<AddBook />} />
           <Route path="/admin/bookDetails" element={<BookDetail />} />
+          <Route path="/orderSuccess/:orderId" element={<OrderSuccess />} />
+          <Route path="/orderHistory" element={<OrderHistory />} />
 
           <Route element={<ProtectedRoutes roles={["Admin"]} />}>
             <Route path="/admin" element={<AdminDashboard />} />
