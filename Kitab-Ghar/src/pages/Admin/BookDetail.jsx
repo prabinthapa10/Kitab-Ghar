@@ -4,6 +4,7 @@ import AdminSidebar from "./AdminSidebar";
 import ActionMenu from "./ActionMenu";
 import ViewBookModal from "./ViewBookModal";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import DiscountModel from "./DiscountModel";
 
 export default function BookDetail() {
   const [books, setBooks] = useState([]);
@@ -13,6 +14,7 @@ export default function BookDetail() {
   const [selectedBook, setSelectedBook] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDiscountModal, setShowDiscountModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -61,6 +63,47 @@ export default function BookDetail() {
   const handleEditBook = (bookId) => {
     console.log("Editing book with ID:", bookId);
     // Implement edit functionality or navigation
+  };
+
+  // Handle set discount
+  const handleSetDiscount = (book) => {
+    setSelectedBook(book);
+    setShowDiscountModal(true);
+  };
+
+  // Confirm and apply discount
+  const confirmSetDiscount = (bookId, discountData) => {
+    if (!bookId) return;
+
+    setIsLoading(true);
+
+    const discountDTO = {
+      bookId: bookId,
+      discountPercent: parseFloat(discountData.discountPercent),
+      discountStart: new Date(discountData.discountStart).toISOString(),
+      discountEnd: new Date(discountData.discountEnd).toISOString(),
+      onSale: discountData.onSale,
+    };
+
+    // Call the discount API endpoint
+    axios
+      .post("https://localhost:7195/api/Discount", discountDTO)
+      .then((response) => {
+        console.log("Discount set successfully:", response.data);
+
+        fetchBooks();
+
+        setShowDiscountModal(false);
+        setSelectedBook(null);
+        setIsLoading(false);
+
+        alert("Discount applied successfully!");
+      })
+      .catch((error) => {
+        console.error("Error setting discount:", error);
+        setError("Failed to set discount. Please try again.");
+        setIsLoading(false);
+      });
   };
 
   // Handle delete book
@@ -216,6 +259,7 @@ export default function BookDetail() {
                           onView={() => handleViewBook(book)}
                           onEdit={() => handleEditBook(book.bookId)}
                           onDelete={() => handleDeleteBook(book)}
+                          onSetDiscount={() => handleSetDiscount(book)}
                         />
                       </span>
                     </td>
@@ -257,6 +301,17 @@ export default function BookDetail() {
           </div>
         </div>
       </div>
+
+      {/* Set discount Model */}
+      {showDiscountModal && selectedBook && (
+        <DiscountModel
+          bookId={selectedBook.bookId}
+          book={selectedBook}
+          onClose={() => setShowDiscountModal(false)}
+          onSetDiscount={confirmSetDiscount}
+          isLoading={isLoading}
+        />
+      )}
 
       {/* View Book Modal */}
       {showViewModal && selectedBook && (
