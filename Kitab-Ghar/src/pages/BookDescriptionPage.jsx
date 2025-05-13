@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
+import { Bookmark, BookmarkCheck } from "lucide-react";
 
 const BookDescriptionPage = () => {
   const { id } = useParams();
@@ -12,7 +13,10 @@ const BookDescriptionPage = () => {
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [bookmarked, setBookmarked] = useState(false);
   const navigate = useNavigate();
+
+  const {id:userId} = useAuth();
 
   useEffect(() => {
     setLoading(true);
@@ -26,23 +30,20 @@ const BookDescriptionPage = () => {
         console.error("Failed to fetch book:", err);
         setLoading(false);
       });
-  }, [id]);
 
-  console.log("user", user);
+    const bookmarks = JSON.parse(localStorage.getItem("bookmarks")) || [];
+    setBookmarked(bookmarks.includes(id));
+  }, [id]);
 
   const handleAddToCart = async () => {
     try {
       if (!user?.userId) throw new Error("User not logged in");
 
       let cart;
-
-      // STEP 1: Fetch all carts and filter for this user
       const allCartsRes = await fetch("https://localhost:7195/api/Cart");
       const allCarts = await allCartsRes.json();
-
       cart = allCarts.find((c) => c.userId === user.userId);
 
-      // STEP 2: If no cart exists for the user, create one
       if (!cart) {
         const createRes = await fetch("https://localhost:7195/api/Cart", {
           method: "POST",
@@ -63,19 +64,14 @@ const BookDescriptionPage = () => {
         cart = await createRes.json();
       }
 
-      // STEP 3: Fetch all cart items
       const cartItemsRes = await fetch("https://localhost:7195/api/CartItem");
       const cartItems = await cartItemsRes.json();
-
-      // STEP 4: Check if item already exists in this user's cart
       const existingItem = cartItems.find(
         (item) => item.bookId === book.bookId && item.cartId === cart.id
       );
 
       let response;
-
       if (existingItem) {
-        // STEP 5: Update quantity
         const updatedItem = {
           ...existingItem,
           quantity: existingItem.quantity + 1,
@@ -94,7 +90,6 @@ const BookDescriptionPage = () => {
           }
         );
       } else {
-        // STEP 6: Add new cart item
         const newItem = {
           bookId: book.bookId,
           quantity: 1,
@@ -119,6 +114,37 @@ const BookDescriptionPage = () => {
     } catch (err) {
       console.error("Error saving cart item:", err);
       setMessage("Failed to add book to cart.");
+    }
+  };
+
+  const handleBookmark = async () => {
+    if (!userId) {
+      toast.error("You must be logged in to bookmark a book.");
+      return;
+    }
+
+    try {
+      const response = await fetch("https://localhost:7195/api/Bookmark", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: userId,
+          bookId: id,
+        }),
+      });
+
+      if (response.ok) {
+        setBookmarked(true); // Optionally set to false if toggling is supported in backend
+        toast.success("Book bookmarked successfully!");
+      } else {
+        const errorText = await response.text();
+        toast.error("Failed to bookmark book: " + errorText);
+      }
+    } catch (error) {
+      console.error("Bookmark error:", error);
+      toast.error("An error occurred while bookmarking.");
     }
   };
 
@@ -182,9 +208,19 @@ const BookDescriptionPage = () => {
               {/* Book Details */}
               <div className="p-8 md:p-10 lg:p-12">
                 <div className="mb-8">
-                  <h1 className="text-3xl md:text-4xl font-bold mb-3 text-gray-900 leading-tight">
-                    {title}
-                  </h1>
+                  <div className="flex items-start justify-between mb-3">
+                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+                      {title}
+                    </h1>
+                    <button onClick={handleBookmark}>
+                      {bookmarked ? (
+                        <BookmarkCheck className="w-7 h-7 text-yellow-500 hover:text-yellow-600" />
+                      ) : (
+                        <Bookmark className="w-7 h-7 text-gray-400 hover:text-gray-600" />
+                      )}
+                    </button>
+                  </div>
+
                   <p className="text-xl text-black mb-6">by {author}</p>
 
                   <div className="mb-8">
@@ -195,7 +231,7 @@ const BookDescriptionPage = () => {
 
                   <div className="flex gap-4 mb-8">
                     <button
-                      className="px-8 py-3 bg-amber-50 hover:bg-amber-100 text-black rounded-lg  transition-colors shadow-md font-medium"
+                      className="px-8 py-3 bg-amber-50 hover:bg-amber-100 text-black rounded-lg transition-colors shadow-md font-medium"
                       onClick={handleAddToCart}
                     >
                       Add to Cart

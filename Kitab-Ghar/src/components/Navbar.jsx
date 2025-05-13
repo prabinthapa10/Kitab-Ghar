@@ -156,9 +156,12 @@ function Navbar() {
           />
         </div>
 
-        <a href="#">
-          <FontAwesomeIcon icon={faHeart} />
-        </a>
+        <a href="#"></a>
+        <div className="relative">
+          <Link to="/user/bookmark" className="text-xl hover:text-amber-600">
+            <FontAwesomeIcon icon={faHeart} />
+          </Link>
+        </div>
         <div className="relative">
           <Link to="/cart" className="text-xl hover:text-amber-600">
             <FontAwesomeIcon icon={faShoppingCart} />
