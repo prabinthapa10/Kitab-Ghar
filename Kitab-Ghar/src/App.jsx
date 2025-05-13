@@ -9,6 +9,7 @@ import Signup from "./pages/Signup";
 import Book from "./pages/Book";
 import UserDetails from "./pages/ProfilePage";
 import CartPage from "./pages/CartPage";
+import OrderPage from "./pages/OrderPage";
 
 import { ToastContainer } from "react-toastify";
 import AboutPage from "./pages/AboutPage";
@@ -23,66 +24,20 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route
-            path="/"
-            element={
-              <PublicRoutes restricted>
-                <Home />
-              </PublicRoutes>
-            }
-          />
-          <Route
-            path="/login"
-            element={
-              <PublicRoutes restricted>
-                <Login />
-              </PublicRoutes>
-            }
-          />
-          <Route
-            path="/register"
-            element={
-              <PublicRoutes restricted>
-                <Signup />
-              </PublicRoutes>
-            }
-          />
-          <Route
-            path="/book"
-            element={
-              <PublicRoutes restricted>
-                <Book />
-              </PublicRoutes>
-            }
-          />
-          <Route
-            path="/book/:id"
-            element={
-              <PublicRoutes restricted>
-                <BookDescriptionPage />
-              </PublicRoutes>
-            }
-          />
-          <Route
-            path="/about"
-            element={
-              <PublicRoutes restricted>
-                <AboutPage />
-              </PublicRoutes>
-            }
-          />
-          <Route
-            path="/contact"
-            element={
-              <PublicRoutes restricted>
-                <ContactPage />
-              </PublicRoutes>
-            }
-          />
-          <Route element={<ProtectedRoutes roles={["Member"]} />}>
-            <Route path="/user" element={<UserDetails />} />
-            <Route path="/cart" element={<CartPage />} />
-          </Route>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Signup />} />
+          <Route path="/book" element={<Book />} />
+          <Route path="/book/:id" element={<BookDescriptionPage />} />
+          <Route path="/user" element={<UserDetails />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/order/:orderId" element={<OrderPage />} />
+
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/addBook" element={<AddBook />} />
+          <Route path="/admin/bookDetails" element={<BookDetail />} />
 
           <Route element={<ProtectedRoutes roles={["Admin"]} />}>
             <Route path="/admin" element={<AdminDashboard />} />

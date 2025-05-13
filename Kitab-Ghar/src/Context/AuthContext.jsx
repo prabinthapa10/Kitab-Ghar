@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import getUserDetails from "../utils/CheckUserDetails";
 
 const AuthContext = createContext();
@@ -10,7 +16,7 @@ export const AuthProvider = ({ children }) => {
       const user = JSON.parse(localStorage.getItem("user") || "null");
       return {
         token,
-        user, 
+        user,
         isLoggedIn: !!token,
         loading: !!token, // Only load if we have a token
         error: null,
@@ -36,45 +42,51 @@ export const AuthProvider = ({ children }) => {
     }));
   }, []);
 
-  const updateUser = useCallback((newUserDetails) => {
-    try {
-      if (newUserDetails) {
-        localStorage.setItem("user", JSON.stringify(newUserDetails));
-        updateAuthState({ user: newUserDetails, error: null });
-      } else {
-        localStorage.removeItem("user");
-        updateAuthState({ user: null });
+  const updateUser = useCallback(
+    (newUserDetails) => {
+      try {
+        if (newUserDetails) {
+          localStorage.setItem("user", JSON.stringify(newUserDetails));
+          updateAuthState({ user: newUserDetails, error: null });
+        } else {
+          localStorage.removeItem("user");
+          updateAuthState({ user: null });
+        }
+      } catch (error) {
+        console.error("Error updating user:", error);
+        updateAuthState({ error: "Failed to update user" });
       }
-    } catch (error) {
-      console.error("Error updating user:", error);
-      updateAuthState({ error: "Failed to update user" });
-    }
-  }, [updateAuthState]);
+    },
+    [updateAuthState]
+  );
 
-  const updateToken = useCallback((newToken) => {
-    try {
-      if (newToken) {
-        localStorage.setItem("token", newToken);
-        updateAuthState({ 
-          token: newToken,
-          isLoggedIn: true,
-          loading: true, // Set loading true when we get a new token
-          error: null 
-        });
-      } else {
-        localStorage.removeItem("token");
-        updateAuthState({
-          token: null,
-          isLoggedIn: false,
-          user: null,
-          loading: false,
-        });
+  const updateToken = useCallback(
+    (newToken) => {
+      try {
+        if (newToken) {
+          localStorage.setItem("token", newToken);
+          updateAuthState({
+            token: newToken,
+            isLoggedIn: true,
+            loading: true, // Set loading true when we get a new token
+            error: null,
+          });
+        } else {
+          localStorage.removeItem("token");
+          updateAuthState({
+            token: null,
+            isLoggedIn: false,
+            user: null,
+            loading: false,
+          });
+        }
+      } catch (error) {
+        console.error("Error updating token:", error);
+        updateAuthState({ error: "Failed to update token" });
       }
-    } catch (error) {
-      console.error("Error updating token:", error);
-      updateAuthState({ error: "Failed to update token" });
-    }
-  }, [updateAuthState]);
+    },
+    [updateAuthState]
+  );
 
   const logout = useCallback(() => {
     try {
@@ -95,7 +107,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     let isMounted = true;
-    
+
     const fetchUserDetails = async () => {
       if (!token) {
         updateAuthState({ loading: false });
@@ -115,17 +127,17 @@ export const AuthProvider = ({ children }) => {
           });
         } else {
           // Token might be invalid, but don't logout automatically
-          updateAuthState({ 
+          updateAuthState({
             loading: false,
-            error: "Failed to fetch user details" 
+            error: "Failed to fetch user details",
           });
         }
       } catch (error) {
         if (!isMounted) return;
         console.error("Error in fetchUserDetails:", error);
-        updateAuthState({ 
+        updateAuthState({
           loading: false,
-          error: error.message 
+          error: error.message,
         });
         // Don't automatically logout - let the UI decide
       }

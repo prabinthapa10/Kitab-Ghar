@@ -17,10 +17,10 @@ function Home() {
   const sliderSettings = {
     dots: false,
     infinite: announcements.length > 1,
-    speed: 500, 
-    slidesToShow: 1, 
-    slidesToScroll: 1, 
-    autoplay: true, 
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
     autoplaySpeed: 5000,
     arrows: false,
   };
@@ -134,7 +134,7 @@ function Home() {
               "Biography",
             ].map((category) => (
               <Link
-                href="#"
+                to={`/book?genre=${encodeURIComponent(category)}`}
                 key={category}
                 className="bg-white rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow hover:text-amber-600"
               >

@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 const BookDescriptionPage = () => {
   const { id } = useParams();
-  const { addToCart } = useCart();
+  const { user } = useAuth();
+
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -25,38 +27,88 @@ const BookDescriptionPage = () => {
       });
   }, [id]);
 
+  console.log("user", user);
+
   const handleAddToCart = async () => {
-    const cartItem = {
-      bookId: book.bookId,
-      quantity: 1,
-      price: book.price,
-    };
-
-    console.log("Sending to backend:", JSON.stringify(cartItem));
-
     try {
-      const response = await fetch("https://localhost:7195/api/CartItem", {
+      if (!user?.id) throw new Error("User not logged in");
+
+      // const cartRes = await fetch("https://localhost:7195/api/Cart", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     cartDTO: {
+      //       userId: Number(user.id),
+      //       date: new Date().toISOString(),
+      //     },
+      //   }),
+      // });
+
+      const cartData = {
+        userId: user.id, // send UUID as string
+        date: new Date().toISOString(),
+      };
+
+      const response = await fetch("https://localhost:7195/api/Cart", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(cartItem),
+        body: JSON.stringify(cartData),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to add item to cart");
+      if (!cartRes.ok) {
+        const errorText = await cartRes.text();
+        throw new Error("Failed to get or create cart: " + errorText);
       }
 
-      const result = await response.json();
-      console.log("Saved to database:", result);
+      const cart = await cartRes.json();
+      const cartItemsRes = await fetch(`https://localhost:7195/api/CartItem`);
+      const cartItems = await cartItemsRes.json();
 
-      // Optional: update client cart context
-      // addToCart({
-      //   id: book.bookId,
-      //   name: book.title,
-      //   price: book.price,
-      //   image: book.image,
-      // });
+      const existingItem = cartItems.find(
+        (item) => item.bookId === book.bookId && item.cartId === cart.id
+      );
+
+      // let response;
+
+      if (existingItem) {
+        const updatedItem = {
+          ...existingItem,
+          quantity: existingItem.quantity + 1,
+        };
+
+        response = await fetch(
+          `https://localhost:7195/api/CartItem/${existingItem.id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(updatedItem),
+          }
+        );
+      } else {
+        const newItem = {
+          bookId: book.bookId,
+          quantity: 1,
+          // cartId: cart.id,
+          price: book.price,
+        };
+
+        response = await fetch("https://localhost:7195/api/CartItem", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newItem),
+        });
+      }
+
+      if (!response.ok) throw new Error("Failed to update/add item");
 
       setMessage("Book added to cart successfully!");
       setTimeout(() => {
