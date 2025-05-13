@@ -10,6 +10,7 @@ import {
   faShoppingCart,
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,16 +18,22 @@ function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
+  const { id } = useAuth();
 
   useEffect(() => {
-    // Set active link based on current route
     const path = location.pathname;
-    if (path.includes("book")) {
+    if (path.includes("/book")) {
       setActiveLink("book");
-    } else if (path.includes("about")) {
+    } else if (path.includes("/about")) {
       setActiveLink("about");
-    } else if (path.includes("contact")) {
+    } else if (path.includes("/contact")) {
       setActiveLink("contact");
+    } else if (path.includes("/user/bookmark")) {
+      setActiveLink("bookmark");
+    } else if (path === "/user") {
+      setActiveLink("user");
+    } else if (path.includes("/cart")) {
+      setActiveLink("cart");
     } else {
       setActiveLink("home");
     }
@@ -34,9 +41,8 @@ function Navbar() {
 
   const toggleDropdown = (e) => {
     e.preventDefault();
-    const token = localStorage.getItem("token");
 
-    if (token) {
+    if (id) {
       setIsOpen(!isOpen);
     } else {
       navigate("/login");
@@ -123,27 +129,53 @@ function Navbar() {
       {/* Right: Icons */}
       <div className="flex items-center space-x-4 text-xl">
         <div className="relative inline-block text-left">
-          <span onClick={toggleDropdown}>
-            <FontAwesomeIcon icon={faUser} className="cursor-pointer text-xl" />
-          </span>
-
-          {isOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg z-10">
+          {localStorage.getItem("token") ? (
+            // When logged in, show faUser icon and dropdown
+            <>
               <Link
                 to="/user"
-                className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                onClick={(e) => {
+                  handleLinkClick("user");
+                  toggleDropdown(e);
+                }}
+                className={`cursor-pointer text-xl ${
+                  activeLink === "user" ? "text-amber-600" : ""
+                }`}
               >
-                Profile
+                <FontAwesomeIcon icon={faUser} />
               </Link>
-              <span
-                onClick={(e) => handleLogout(e)}
-                className="block px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
+
+              {isOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg z-10">
+                  <Link
+                    to="/user"
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                  >
+                    Profile
+                  </Link>
+                  <span
+                    onClick={handleLogout}
+                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
+                  >
+                    Logout
+                  </span>
+                </div>
+              )}
+            </>
+          ) : (
+            // When not logged in, show Login and Register links
+            <div className="flex items-center space-x-4 text-sm">
+              <Link
+                to="/login"
+                className="text-gray-800 hover:text-amber-600 font-medium"
+                onClick={() => handleLinkClick("")}
               >
-                Logout
-              </span>
+                Login
+              </Link>
             </div>
           )}
         </div>
+
         <div className="relative hidden md:block">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
           <input
@@ -156,14 +188,28 @@ function Navbar() {
           />
         </div>
 
-        <a href="#"></a>
+        {/* Wishlist / Bookmark */}
         <div className="relative">
-          <Link to="/user/bookmark" className="text-xl hover:text-amber-600">
+          <Link
+            to="/user/bookmark"
+            onClick={() => handleLinkClick("bookmark")}
+            className={`text-xl hover:text-amber-600 ${
+              activeLink === "bookmark" ? "text-amber-600" : ""
+            }`}
+          >
             <FontAwesomeIcon icon={faHeart} />
           </Link>
         </div>
+
+        {/* Cart */}
         <div className="relative">
-          <Link to="/cart" className="text-xl hover:text-amber-600">
+          <Link
+            to="/cart"
+            onClick={() => handleLinkClick("cart")}
+            className={`text-xl hover:text-amber-600 ${
+              activeLink === "cart" ? "text-amber-600" : ""
+            }`}
+          >
             <FontAwesomeIcon icon={faShoppingCart} />
             <span className="absolute -top-1.5 -right-2 bg-amber-600 text-white text-[10px] font-semibold rounded-full h-4 w-4 flex items-center justify-center shadow">
               0

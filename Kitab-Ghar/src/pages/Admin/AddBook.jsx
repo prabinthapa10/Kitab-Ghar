@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import AdminSidebar from "./AdminSidebar";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const AddBook = () => {
   const [book, setBook] = useState({
@@ -60,7 +61,7 @@ const AddBook = () => {
         }
       );
       console.log("Book added successfully:", response.data);
-      alert("Book added successfully!");
+      toast.success("Successfully added.");
     } catch (error) {
       console.error(
         "Error adding book:",

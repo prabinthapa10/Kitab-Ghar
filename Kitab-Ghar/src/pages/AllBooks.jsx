@@ -7,6 +7,9 @@ import axios from "axios";
 const AllBooks = ({ filters = {} }) => {
   const [books, setBooks] = useState([]);
   const [discounts, setDiscounts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const booksPerPage = 9;
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -50,6 +53,7 @@ const AllBooks = ({ filters = {} }) => {
         const res = await fetch(url);
         const data = await res.json();
         setBooks(data);
+        setCurrentPage(1); // reset to page 1 when books change
       } catch (err) {
         console.error("Error fetching books:", err);
       }
@@ -76,14 +80,22 @@ const AllBooks = ({ filters = {} }) => {
     return discount ? discount : null;
   };
 
-  console.log(discounts);
+  // Pagination logic
+  const indexOfLastBook = currentPage * booksPerPage;
+  const indexOfFirstBook = indexOfLastBook - booksPerPage;
+  const currentBooks = books.slice(indexOfFirstBook, indexOfLastBook);
+  const totalPages = Math.ceil(books.length / booksPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 py-4">
-        {books.length > 0 ? (
-          books.map((book) => {
-            const discount = getDiscountForBook(book.bookId); // Get the discount for the current book
+        {currentBooks.length > 0 ? (
+          currentBooks.map((book) => {
+            const discount = getDiscountForBook(book.bookId);
             return (
               <div
                 key={book.bookId}
@@ -91,7 +103,7 @@ const AllBooks = ({ filters = {} }) => {
                 className="p-0 bg-white rounded-lg overflow-hidden shadow-md transition-all duration-300 cursor-pointer"
               >
                 <BookCard
-                  id={book.bookId} // Pass the correct bookId
+                  id={book.bookId}
                   image={book.image}
                   title={book.title}
                   genre={book.genre}
@@ -107,6 +119,41 @@ const AllBooks = ({ filters = {} }) => {
           </div>
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {books.length > booksPerPage && (
+        <div className="flex justify-center items-center gap-2 py-4">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-3 py-1 border rounded disabled:opacity-50"
+          >
+            Prev
+          </button>
+
+          {[...Array(totalPages)].map((_, i) => (
+            <button
+              key={i + 1}
+              onClick={() => handlePageChange(i + 1)}
+              className={`px-3 py-1 border rounded ${
+                currentPage === i + 1
+                  ? "bg-black text-white"
+                  : "bg-white text-black"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-3 py-1 border rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };

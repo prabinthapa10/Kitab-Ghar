@@ -8,10 +8,12 @@ import axios from "axios";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { useNavigate } from "react-router-dom";
 
 function Home() {
   const [announcements, setAnnouncements] = useState([]);
   const [showBanner, setShowBanner] = useState(false);
+  const navigate = useNavigate();
 
   // Slider settings
   const sliderSettings = {
@@ -93,7 +95,10 @@ function Home() {
               gems. Your reading adventure starts here.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <button className="bg-orange-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-orange-700 transition">
+              <button
+                onClick={() => navigate("/book")}
+                className="bg-orange-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-orange-700 transition"
+              >
                 Browse Collection
               </button>
               <button className="border border-orange-600 text-orange-600 px-6 py-2 rounded-md font-semibold hover:bg-orange-100 transition">
