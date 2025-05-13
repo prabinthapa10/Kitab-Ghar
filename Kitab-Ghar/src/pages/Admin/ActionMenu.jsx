@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 
-const ActionMenu = ({ onView, onEdit, onDelete }) => {
+const ActionMenu = ({ onView, onEdit, onDelete, onSetDiscount }) => {
   const [open, setOpen] = useState(false);
   const menuRef = useRef();
 
@@ -26,6 +26,15 @@ const ActionMenu = ({ onView, onEdit, onDelete }) => {
       {open && (
         <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
           <div className="py-1 text-sm">
+            <button
+              onClick={() => {
+                onSetDiscount();
+                setOpen(false);
+              }}
+              className="flex items-center gap-2 px-4 py-2 w-full hover:bg-gray-100"
+            >
+              💰 Set Discounts
+            </button>
             <button
               onClick={() => {
                 onView();
