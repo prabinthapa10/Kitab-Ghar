@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
+import { toast } from "react-toastify";
 
 const BookDescriptionPage = () => {
   const { id } = useParams();
@@ -31,54 +32,55 @@ const BookDescriptionPage = () => {
 
   const handleAddToCart = async () => {
     try {
-      if (!user?.id) throw new Error("User not logged in");
+      if (!user?.userId) throw new Error("User not logged in");
 
-      // const cartRes = await fetch("https://localhost:7195/api/Cart", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     cartDTO: {
-      //       userId: Number(user.id),
-      //       date: new Date().toISOString(),
-      //     },
-      //   }),
-      // });
+      let cart;
 
-      const cartData = {
-        userId: user.id, // send UUID as string
-        date: new Date().toISOString(),
-      };
+      // STEP 1: Fetch all carts and filter for this user
+      const allCartsRes = await fetch("https://localhost:7195/api/Cart");
+      const allCarts = await allCartsRes.json();
 
-      const response = await fetch("https://localhost:7195/api/Cart", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(cartData),
-      });
+      cart = allCarts.find((c) => c.userId === user.userId);
 
-      if (!cartRes.ok) {
-        const errorText = await cartRes.text();
-        throw new Error("Failed to get or create cart: " + errorText);
+      // STEP 2: If no cart exists for the user, create one
+      if (!cart) {
+        const createRes = await fetch("https://localhost:7195/api/Cart", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: user.userId,
+            date: new Date().toISOString(),
+          }),
+        });
+
+        if (!createRes.ok) {
+          const errorText = await createRes.text();
+          throw new Error("Failed to create cart: " + errorText);
+        }
+
+        cart = await createRes.json();
       }
 
-      const cart = await cartRes.json();
-      const cartItemsRes = await fetch(`https://localhost:7195/api/CartItem`);
+      // STEP 3: Fetch all cart items
+      const cartItemsRes = await fetch("https://localhost:7195/api/CartItem");
       const cartItems = await cartItemsRes.json();
 
+      // STEP 4: Check if item already exists in this user's cart
       const existingItem = cartItems.find(
         (item) => item.bookId === book.bookId && item.cartId === cart.id
       );
 
-      // let response;
+      let response;
 
       if (existingItem) {
+        // STEP 5: Update quantity
         const updatedItem = {
           ...existingItem,
           quantity: existingItem.quantity + 1,
+          cartId: existingItem.cartId,
+          bookId: existingItem.bookId,
         };
 
         response = await fetch(
@@ -92,11 +94,11 @@ const BookDescriptionPage = () => {
           }
         );
       } else {
+        // STEP 6: Add new cart item
         const newItem = {
           bookId: book.bookId,
           quantity: 1,
-          // cartId: cart.id,
-          price: book.price,
+          cartId: cart.id,
         };
 
         response = await fetch("https://localhost:7195/api/CartItem", {
@@ -110,11 +112,10 @@ const BookDescriptionPage = () => {
 
       if (!response.ok) throw new Error("Failed to update/add item");
 
-      setMessage("Book added to cart successfully!");
-      setTimeout(() => {
-        setMessage("");
-        navigate("/cart");
-      }, 1500);
+      toast.success("Item added to cart successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+      });
     } catch (err) {
       console.error("Error saving cart item:", err);
       setMessage("Failed to add book to cart.");
@@ -199,11 +200,6 @@ const BookDescriptionPage = () => {
                     >
                       Add to Cart
                     </button>
-                    {message && (
-                      <p className="mt-4 text-green-600 font-medium">
-                        {message}
-                      </p>
-                    )}
 
                     <button className="px-8 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
                       Buy Now
