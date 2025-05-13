@@ -1,6 +1,6 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import BookCard from "./BookCard"; 
+import BookCard from "./BookCard";
 
 function FeaturedBooks() {
   const navigate = useNavigate();

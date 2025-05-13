@@ -16,6 +16,7 @@ function Navbar() {
   const [activeLink, setActiveLink] = useState(""); // Track active menu item
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     // Set active link based on current route
@@ -51,6 +52,12 @@ function Navbar() {
 
   const handleLinkClick = (link) => {
     setActiveLink(link); // Set the clicked link as active
+  };
+
+  const handleSearch = (e) => {
+    if (e.key === "Enter" && searchTerm.trim() !== "") {
+      navigate(`/book?search=${encodeURIComponent(searchTerm.trim())}`);
+    }
   };
 
   return (
@@ -142,6 +149,9 @@ function Navbar() {
           <input
             type="search"
             placeholder="Search books..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={handleSearch}
             className="w-[220px] pl-10 pr-4 py-2 rounded-full bg-gray-100 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200"
           />
         </div>
