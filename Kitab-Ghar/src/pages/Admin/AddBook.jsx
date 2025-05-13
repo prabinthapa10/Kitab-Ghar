@@ -63,7 +63,10 @@ const AddBook = () => {
       console.log("Book added successfully:", response.data);
       alert("Book added successfully!");
     } catch (error) {
-      console.error("Error adding book:", error.response?.data || error.message);
+      console.error(
+        "Error adding book:",
+        error.response?.data || error.message
+      );
       alert("Failed to add book.");
     }
   };
@@ -216,6 +219,20 @@ const AddBook = () => {
                   <option value="">Select Language</option>
                   <option value="english">English</option>
                   <option value="spanish">Spanish</option>
+                  <option value="french">French</option>
+                  <option value="german">German</option>
+                  <option value="italian">Italian</option>
+                  <option value="portuguese">Portuguese</option>
+                  <option value="chinese">Chinese</option>
+                  <option value="japanese">Japanese</option>
+                  <option value="korean">Korean</option>
+                  <option value="russian">Russian</option>
+                  <option value="arabic">Arabic</option>
+                  <option value="hindi">Hindi</option>
+                  <option value="bengali">Bengali</option>
+                  <option value="turkish">Turkish</option>
+                  <option value="dutch">Dutch</option>
+                  <option value="swedish">Swedish</option>
                 </select>
                 <input
                   type="number"

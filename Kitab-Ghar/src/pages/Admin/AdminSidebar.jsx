@@ -8,13 +8,17 @@ import {
   User,
   Menu,
   Megaphone,
+  LogOut,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../Context/AuthContext";
+import { toast } from "react-toastify";
 
 const AdminSidebar = () => {
   const [currentPath, setCurrentPath] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   useEffect(() => {
     setCurrentPath(window.location.pathname);
@@ -73,6 +77,12 @@ const AdminSidebar = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+    toast.success("Logout Successfully");
+  };
+
   return (
     <>
       {/* Mobile menu button */}
@@ -103,7 +113,8 @@ const AdminSidebar = () => {
             <span>Admin Panel</span>
           </button>
         </div>
-        <div className="flex-1">
+
+        <div className="flex-1 flex flex-col justify-between">
           <nav className="grid gap-1 p-2">
             {routes.map((route) => (
               <button
@@ -123,6 +134,17 @@ const AdminSidebar = () => {
               </button>
             ))}
           </nav>
+
+          {/* Logout Button */}
+          <div className="p-2 border-t">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 w-full text-left rounded-md px-3 py-2 text-sm font-medium text-red-600 hover:bg-gray-100"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </button>
+          </div>
         </div>
       </div>
 

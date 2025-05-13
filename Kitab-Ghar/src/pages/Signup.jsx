@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function SignUp() {
   const [name, setName] = useState("");
@@ -8,13 +10,34 @@ export default function SignUp() {
   const [address, setAddress] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+
   const navigate = useNavigate();
+
+  const validateForm = () => {
+    if (!name.trim() || !email.trim() || !address.trim() || !password.trim()) {
+      toast.error("All fields are required.");
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Invalid email format.");
+      return false;
+    }
+
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters long.");
+      return false;
+    }
+
+    return true;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSuccess("");
+
+    if (!validateForm()) return;
+
     try {
       const response = await axios.post(
         "https://localhost:7195/api/Auth/register-member",
@@ -25,14 +48,15 @@ export default function SignUp() {
           },
         }
       );
+
       console.log("Signup success:", response.data);
-      setSuccess("Account created successfully!");
+      toast.success("Account created successfully!");
       navigate("/login");
     } catch (err) {
-      console.error("Signup error:", err.response?.data || err.message);
-      setError(
-        err.response?.data?.Message || err.response?.data || "Signup failed."
-      );
+      const errorMsg =
+        err.response?.data?.Message || err.response?.data || "Signup failed.";
+      console.error("Signup error:", errorMsg);
+      toast.error(errorMsg);
     }
   };
 
@@ -51,10 +75,7 @@ export default function SignUp() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label className="block text-sm font-medium text-gray-700">
               Name
             </label>
             <input
@@ -63,14 +84,12 @@ export default function SignUp() {
               onChange={(e) => setName(e.target.value)}
               placeholder="Ram Bahadur"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
+              required
             />
           </div>
 
           <div className="space-y-2">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label className="block text-sm font-medium text-gray-700">
               Email
             </label>
             <input
@@ -79,40 +98,36 @@ export default function SignUp() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="abc@email.com"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
+              required
             />
           </div>
 
           <div className="space-y-2">
-            <label
-              htmlFor="address"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label className="block text-sm font-medium text-gray-700">
               Address
             </label>
             <input
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              placeholder="Newroad-9, pokhara"
+              placeholder="Newroad-9, Pokhara"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
+              required
             />
           </div>
 
           <div className="space-y-2">
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label className="block text-sm font-medium text-gray-700">
               Password
             </label>
             <div className="relative">
               <input
-                id="password"
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
+                required
               />
               <button
                 type="button"
