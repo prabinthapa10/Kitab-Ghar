@@ -162,6 +162,7 @@ export const AuthProvider = ({ children }) => {
         id: user?.userId,
         role: user?.role,
         name: user?.name,
+        email: user?.email,
         isLoggedIn,
         error,
         setIsLoggedIn: (value) => updateAuthState({ isLoggedIn: value }),
