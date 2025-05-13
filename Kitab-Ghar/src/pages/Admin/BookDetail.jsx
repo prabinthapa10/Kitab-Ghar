@@ -6,6 +6,7 @@ import ViewBookModal from "./ViewBookModal";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import DiscountModel from "./DiscountModel";
 import { toast } from "react-toastify";
+import EditModal from "./EditModal";
 
 export default function BookDetail() {
   const [books, setBooks] = useState([]);
@@ -20,7 +21,20 @@ export default function BookDetail() {
   const [error, setError] = useState(null);
   const [discounts, setDiscounts] = useState([]);
   const [discountPercent, setDiscountPercent] = useState("");
+  const [showEditModal, setShowEditModal] = useState(false);
 
+  const handleEditBook = (book) => {
+    setSelectedBook(book);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateBook = (updatedBook) => {
+    setBooks(
+      books.map((book) =>
+        book.bookId === updatedBook.bookId ? updatedBook : book
+      )
+    );
+  };
   // Add this function inside your component
   const hasDiscount = (bookId) => {
     return discounts.some((discount) => discount.bookId === bookId);
@@ -66,15 +80,6 @@ export default function BookDetail() {
     setSelectedBook(book);
     setShowViewModal(true);
   };
-
-  console.log("current", currentBooks);
-
-  // Handle edit book
-  const handleEditBook = (bookId) => {
-    console.log("Editing book with ID:", bookId);
-    // Implement edit functionality or navigation
-  };
-
   // Handle set discount
   const handleSetDiscount = (bookId, discountData) => {
     setIsLoading(true);
@@ -279,11 +284,11 @@ export default function BookDetail() {
                       <span className="cursor-pointer text-xl">
                         <ActionMenu
                           onView={() => handleViewBook(book)}
-                          onEdit={() => handleEditBook(book.bookId)}
+                          onEdit={() => handleEditBook(book)} // Pass the whole book object
                           onDelete={() => handleDeleteBook(book)}
                           onSetDiscount={() => {
                             setSelectedBook(book);
-                            setShowDiscountModal(true); // Show the discount modal
+                            setShowDiscountModal(true);
                           }}
                         />
                       </span>
@@ -347,6 +352,13 @@ export default function BookDetail() {
         />
       )}
 
+      {showEditModal && selectedBook && (
+        <EditModal
+          book={selectedBook}
+          onClose={() => setShowEditModal(false)}
+          onUpdate={handleUpdateBook}
+        />
+      )}
       {/* Delete Confirmation Modal */}
       {showDeleteModal && selectedBook && (
         <DeleteConfirmationModal

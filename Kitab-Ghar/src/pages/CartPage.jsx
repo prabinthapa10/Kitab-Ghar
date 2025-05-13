@@ -161,10 +161,13 @@ export default function CartPage() {
     }
   };
 
-  const subtotal = (item) => (item.book?.price || 0) * item.quantity;
+  const subtotal = (item) => {
+    const price = item.book?.discountedPrice ?? item.book?.price ?? 0;
+    return price * item.quantity;
+  };
+
   const total = cartItems.reduce((sum, item) => sum + subtotal(item), 0);
 
-  console.log("total0", total);
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -172,65 +175,78 @@ export default function CartPage() {
       <main className="flex-grow container mx-auto mt-8 px-6 md:px-16">
         <div className="flex flex-col md:flex-row gap-6">
           <section className="md:w-2/3 overflow-x-auto">
-            <div className="bg-[#f9f3e9] p-4 grid grid-cols-4 font-medium min-w-[640px]">
+            <div className="bg-[#f9f3e9] p-4 grid grid-cols-5 font-medium min-w-[740px] text-sm md:text-base">
               <span>Product</span>
               <span className="text-center">Price</span>
               <span className="text-center">Quantity</span>
               <span className="text-center">Subtotal</span>
+              <span className="text-center">Action</span>
             </div>
 
             {loading ? (
               <p className="p-4">Loading cart items...</p>
             ) : cartItems.length > 0 ? (
-              cartItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="grid grid-cols-4 items-center py-4 border-b min-w-[640px]"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-20 h-20 overflow-hidden">
-                      <img
-                        src={
-                          item.book?.image ||
-                          "/placeholder.svg?height=80&width=80"
+              cartItems.map((item) => {
+                const price =
+                  item.book?.discountedPrice ?? item.book?.price ?? 0;
+                return (
+                  <div
+                    key={item.id}
+                    className="grid grid-cols-5 items-center py-4 border-b min-w-[740px]"
+                  >
+                    {/* Product Info */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-20 h-20 overflow-hidden rounded border">
+                        <img
+                          src={
+                            item.book?.image ||
+                            "/placeholder.svg?height=80&width=80"
+                          }
+                          alt={item.book?.title}
+                          className="object-cover w-full h-full"
+                        />
+                      </div>
+                      <span className="text-gray-700 font-medium">
+                        {item.book?.title}
+                      </span>
+                    </div>
+
+                    {/* Price */}
+                    <span className="text-center text-gray-700 font-semibold">
+                      Rs. {price.toLocaleString()}
+                    </span>
+
+                    {/* Quantity Input */}
+                    <div className="flex justify-center">
+                      <input
+                        type="number"
+                        min="1"
+                        value={item.quantity}
+                        onChange={(e) =>
+                          updateQuantity(item.id, parseInt(e.target.value) || 1)
                         }
-                        alt={item.book?.title}
-                        className="object-cover w-full h-full"
+                        className="w-14 h-9 border rounded text-center"
                       />
                     </div>
-                    <span className="text-gray-700">{item.book?.title}</span>
-                  </div>
 
-                  <span className="text-center text-gray-700">
-                    Rs. {item.book?.price?.toLocaleString()}
-                  </span>
-
-                  <div className="flex justify-center">
-                    <input
-                      type="number"
-                      min="1"
-                      value={item.quantity}
-                      onChange={(e) =>
-                        updateQuantity(item.id, parseInt(e.target.value) || 1)
-                      }
-                      className="w-12 h-8 border text-center"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-700">
+                    {/* Subtotal */}
+                    <span className="text-center text-gray-700 font-medium">
                       Rs. {subtotal(item)?.toLocaleString()}
                     </span>
-                    <button
-                      onClick={() => removeItem(item.id)}
-                      className="text-amber-600 hover:text-amber-800"
-                      aria-label={`Remove ${item.book?.title}`}
-                    >
-                      <Trash2 size={18} />
-                    </button>
+
+                    {/* Action (Delete Button) */}
+                    <div className="flex justify-center">
+                      <button
+                        onClick={() => removeItem(item.id)}
+                        className="text-red-500 hover:text-red-700 transition"
+                        aria-label={`Remove ${item.book?.title}`}
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <p className="p-4">Your cart is empty.</p>
             )}
