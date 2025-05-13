@@ -23,7 +23,7 @@ const DiscountModal = ({ bookId, onClose, onSetDiscount, isLoading, book }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-white/10 backdrop-blur-md flex items-center justify-center z-50">
       <div
         className="bg-white rounded-lg shadow-lg max-w-xl w-full mx-4 overflow-y-auto max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
@@ -43,11 +43,11 @@ const DiscountModal = ({ bookId, onClose, onSetDiscount, isLoading, book }) => {
 
         {/* Main content  */}
         <form onSubmit={handleSubmit} className="p-6 pt-6">
-          <div className="space-y-6"> 
+          <div className="space-y-6">
             <div>
               <label
                 htmlFor="discountPercent"
-                className="block text-sm font-medium text-gray-700 mb-2" 
+                className="block text-sm font-medium text-gray-700 mb-2"
               >
                 Discount Percentage
               </label>
@@ -77,7 +77,7 @@ const DiscountModal = ({ bookId, onClose, onSetDiscount, isLoading, book }) => {
             </div>
 
             {/* Date Range - Side by Side */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Start Date */}
               <div>
                 <label
@@ -102,7 +102,7 @@ const DiscountModal = ({ bookId, onClose, onSetDiscount, isLoading, book }) => {
               <div>
                 <label
                   htmlFor="discountEnd"
-                  className="block text-sm font-medium text-gray-700 mb-2" 
+                  className="block text-sm font-medium text-gray-700 mb-2"
                 >
                   End Date
                 </label>
@@ -126,11 +126,13 @@ const DiscountModal = ({ bookId, onClose, onSetDiscount, isLoading, book }) => {
                   Preview: Discounted price will be Rs.{" "}
                   {(
                     book.price -
-                    (book.price * parseFloat(discountData.discountPercent)) / 100
+                    (book.price * parseFloat(discountData.discountPercent)) /
+                      100
                   ).toFixed(2)}{" "}
                   (Save Rs.{" "}
                   {(
-                    (book.price * parseFloat(discountData.discountPercent)) / 100
+                    (book.price * parseFloat(discountData.discountPercent)) /
+                    100
                   ).toFixed(2)}
                   )
                 </p>
@@ -158,7 +160,7 @@ const DiscountModal = ({ bookId, onClose, onSetDiscount, isLoading, book }) => {
           </div>
 
           {/* Bottom spacing - Added py-6 to the footer div */}
-          <div className="border-t p-4 py-6 flex justify-end space-x-4"> 
+          <div className="border-t p-4 py-6 flex justify-end space-x-4">
             <button
               type="button"
               onClick={onClose}

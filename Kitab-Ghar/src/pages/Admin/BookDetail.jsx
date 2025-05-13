@@ -17,7 +17,12 @@ export default function BookDetail() {
   const [showDiscountModal, setShowDiscountModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [discounts, setDiscounts] = useState([]);
 
+  // Add this function inside your component
+  const hasDiscount = (bookId) => {
+    return discounts.some((discount) => discount.bookId === bookId);
+  };
   // Fetch books
   const fetchBooks = () => {
     setIsLoading(true);
@@ -36,8 +41,26 @@ export default function BookDetail() {
       });
   };
 
+  const fetchDiscounts = () => {
+    setIsLoading(true);
+    setError(null);
+
+    axios
+      .get("https://localhost:7195/api/Discount")
+      .then((response) => {
+        setDiscounts(response.data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching discounts:", error);
+        setError("Failed to load discounts. Please try again later.");
+        setIsLoading(false);
+      });
+  };
+
   useEffect(() => {
     fetchBooks();
+    fetchDiscounts();
   }, []);
 
   // Filter books based on search term
@@ -220,6 +243,7 @@ export default function BookDetail() {
                 <th className="p-2">Availability</th>
                 <th className="p-2">ISBN</th>
                 <th className="p-2">Actions</th>
+                <th className="p-2">On Sale</th>
               </tr>
             </thead>
             <tbody>
@@ -253,6 +277,17 @@ export default function BookDetail() {
                       </span>
                     </td>
                     <td className="p-2">{book.isbn}</td>
+                    <td className="p-2">
+                      {hasDiscount(book.bookId) ? (
+                        <span className="px-2 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">
+                          On Sale
+                        </span>
+                      ) : (
+                        <span className="px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
+                          Regular
+                        </span>
+                      )}
+                    </td>
                     <td className="p-2 text-center">
                       <span className="cursor-pointer text-xl">
                         <ActionMenu
