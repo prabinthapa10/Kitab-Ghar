@@ -13,7 +13,7 @@ export default function CartPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user?.id) {
+    if (user?.userId) {
       fetchCartItems();
     }
   }, [user]);
@@ -22,20 +22,46 @@ export default function CartPage() {
     try {
       const token = localStorage.getItem("token");
 
-      if (!user?.id) {
+      if (!user?.userId) {
         throw new Error("User not logged in.");
       }
 
-      const cartRes = await axios.get(`https://localhost:7195/api/CartItem`, {
+      // Step 1: Fetch all carts and get the logged-in user's cart
+      const cartRes = await axios.get("https://localhost:7195/api/Cart", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      const items = cartRes.data;
+      const carts = cartRes.data;
+      const userCart = carts.find((cart) => cart.userId === user.userId);
 
+      if (!userCart) {
+        console.warn(`No cart found for user ID: ${user.userId}`);
+        setCartItems([]);
+        return;
+      }
+
+      // Step 2: Fetch all cart items
+      const cartItemRes = await axios.get(
+        "https://localhost:7195/api/CartItem",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const allItems = cartItemRes.data;
+
+      // Step 3: Filter items belonging to the user's cart
+      const userCartItems = allItems.filter(
+        (item) => item.cartId === userCart.id
+      );
+
+      // Step 4: Enrich each item with book details
       const enrichedItems = await Promise.all(
-        items.map(async (item) => {
+        userCartItems.map(async (item) => {
           try {
             const bookRes = await axios.get(
               `https://localhost:7195/api/Books/${item.bookId}`
@@ -45,15 +71,32 @@ export default function CartPage() {
               book: bookRes.data,
             };
           } catch (err) {
-            console.error("Error fetching book", item.bookId, err);
+            console.error(`Error fetching book ID ${item.bookId}:`, err);
             return item;
           }
         })
       );
 
+      // Debug logs
+      console.log("User ID:", user.userId);
+      console.log("User's cart ID:", userCart.id);
+      console.log("Filtered cart items:", userCartItems);
+      console.log("Cart items from API:", cartItemRes.data);
+
+      // console.log(
+      //   "Checking match: item.cartId:",
+      //   typeof item.cartId,
+      //   item.cartId,
+      //   "vs",
+      //   typeof userCart.id,
+      //   userCart.id
+      // );
+
+      // Step 5: Set state
       setCartItems(enrichedItems);
     } catch (err) {
-      console.error("Error fetching cart items", err);
+      console.error("Error fetching cart items:", err);
+      setCartItems([]);
     } finally {
       setLoading(false);
     }
@@ -62,14 +105,13 @@ export default function CartPage() {
   const updateQuantity = async (id, quantity) => {
     if (quantity < 1) return;
     try {
+      const itemToUpdate = cartItems.find((item) => item.id === id);
       await axios.put(`https://localhost:7195/api/CartItem/${id}`, {
-        ...cartItems.find((item) => item.id === id),
+        ...itemToUpdate,
         quantity,
       });
       setCartItems((items) =>
-        items.map((item) =>
-          item.id === id ? { ...item, quantity: quantity } : item
-        )
+        items.map((item) => (item.id === id ? { ...item, quantity } : item))
       );
     } catch (err) {
       console.error("Failed to update quantity", err);
@@ -87,12 +129,10 @@ export default function CartPage() {
 
   const Checkout = async () => {
     try {
-      if (!user?.id) {
-        throw new Error("User is not authenticated");
-      }
+      if (!user?.id) throw new Error("User is not authenticated");
 
       const totalAmount = cartItems.reduce(
-        (total, item) => total + item.price * item.quantity,
+        (total, item) => total + (item.book?.price || 0) * item.quantity,
         0
       );
 
@@ -102,55 +142,32 @@ export default function CartPage() {
         totalAmount,
         date: new Date().toISOString(),
       };
+      const orderRes = await axios.post(
+        "https://localhost:7195/api/Order",
+        orderPayload
+      );
 
-      // Step 1: Create the order
-      const orderRes = await fetch("https://localhost:7195/api/Order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderPayload),
-      });
-
-      if (!orderRes.ok) {
-        const errorData = await orderRes.json();
-        console.error("Order creation error:", errorData);
-        throw new Error("Failed to create order");
-      }
-
-      const createdOrder = await orderRes.json();
+      const createdOrder = orderRes.data;
       const orderId = createdOrder.id;
 
-      // Step 2: Create order items
       for (const item of cartItems) {
         const itemPayload = {
           orderId,
-          bookId: item.bookId || item.id, // ensure you pass correct book ID
+          bookId: item.bookId,
           quantity: item.quantity,
         };
 
-        const itemRes = await fetch("https://localhost:7195/api/OrderItem", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(itemPayload),
-        });
-
-        if (!itemRes.ok) {
-          const itemError = await itemRes.json();
-          console.error("OrderItem creation failed:", itemError);
-          throw new Error("Failed to create order item");
-        }
+        await axios.post("https://localhost:7195/api/OrderItem", itemPayload);
       }
 
-      // Step 3: Navigate to confirmation/order details page
       navigate(`/order/${orderId}`);
     } catch (err) {
       console.error("Checkout failed:", err.message);
     }
   };
-  const subtotal = (item) => item.book?.price * item.quantity;
-  const total = cartItems.reduce(
-    (sum, item) => sum + (item.book?.price || 0) * item.quantity,
-    0
-  );
+
+  const subtotal = (item) => (item.book?.price || 0) * item.quantity;
+  const total = cartItems.reduce((sum, item) => sum + subtotal(item), 0);
 
   return (
     <div className="min-h-screen flex flex-col">
