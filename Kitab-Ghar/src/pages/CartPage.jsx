@@ -174,9 +174,11 @@ export default function CartPage() {
       toast.error("Checkout failed");
     }
   };
-
   const subtotal = (item) => {
-    const price = item.book?.discountedPrice ?? item.book?.price ?? 0;
+    const price =
+      item.book?.discountedPrice === 0
+        ? item.book?.price
+        : item.book?.discountedPrice ?? item.book?.price ?? 0;
     return price * item.quantity;
   };
 
@@ -207,7 +209,10 @@ export default function CartPage() {
             ) : cartItems.length > 0 ? (
               cartItems.map((item) => {
                 const price =
-                  item.book?.discountedPrice ?? item.book?.price ?? 0;
+                  item.book?.discountedPrice === 0
+                    ? item.book?.price
+                    : item.book?.discountedPrice ?? item.book?.price ?? 0;
+
                 return (
                   <div
                     key={item.id}
