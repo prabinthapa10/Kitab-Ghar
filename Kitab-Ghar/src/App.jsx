@@ -28,34 +28,79 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Signup />} />
-          <Route path="/book" element={<Book />} />
-          <Route path="/book/:id" element={<BookDescriptionPage />} />
-          <Route path="/user" element={<UserDetails />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/history" element={<History />} />
-          <Route path="/order/:orderId" element={<OrderPage />} />
+          <Route
+            path="/"
+            element={
+              <PublicRoutes restricted>
+                <Home />
+              </PublicRoutes>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <PublicRoutes restricted>
+                <Login />
+              </PublicRoutes>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <PublicRoutes restricted>
+                <Signup />
+              </PublicRoutes>
+            }
+          />
+          <Route
+            path="/book"
+            element={
+              <PublicRoutes restricted>
+                <Book />
+              </PublicRoutes>
+            }
+          />
+          <Route
+            path="/book/:id"
+            element={
+              <PublicRoutes restricted>
+                <BookDescriptionPage />
+              </PublicRoutes>
+            }
+          />
+          <Route
+            path="/about"
+            element={
+              <PublicRoutes restricted>
+                <AboutPage />
+              </PublicRoutes>
+            }
+          />
+          <Route
+            path="/contact"
+            element={
+              <PublicRoutes restricted>
+                <ContactPage />
+              </PublicRoutes>
+            }
+          />
 
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/addBook" element={<AddBook />} />
-          <Route path="/admin/bookDetails" element={<BookDetail />} />
-          <Route path="/orderSuccess/:orderId" element={<OrderSuccess />} />
+          <Route element={<ProtectedRoutes roles={["Member"]} />}>
+            <Route path="/user" element={<UserDetails />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/order/:orderId" element={<OrderPage />} />
+            <Route path="/orderSuccess/:orderId" element={<OrderSuccess />} />
+          </Route>
 
-          {/* <Route element={<ProtectedRoutes roles={["Admin"]} />}> */}
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/addBook" element={<AddBook />} />
-          <Route path="/admin/bookDetails" element={<BookDetail />} />
-          <Route path="/admin/announcements" element={<AnnouncementPage />} />
-          <Route path="/admin/orders" element={<Order />} />
-          <Route path="/admin/reviews" element={<Reviews />} />
-          {/* </Route> */}
-          {/* <Route path="/book_card" element={<BookCard />} /> */}
-          {/* <Route path="/book/" element={<BookList />} /> */}
-          {/* <Route path="/book/:id" element={<BookDescriptionPage />} /> */}
+          <Route element={<ProtectedRoutes roles={["Admin"]} />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/addBook" element={<AddBook />} />
+            <Route path="/admin/bookDetails" element={<BookDetail />} />
+            <Route path="/admin/announcements" element={<AnnouncementPage />} />
+            <Route path="/admin/orders" element={<Order />} />
+            <Route path="/admin/reviews" element={<Reviews />} />
+          </Route>
         </Routes>
       </BrowserRouter>
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
