@@ -3,6 +3,7 @@ import axios from "axios";
 import Modal from "react-modal";
 import { useAuth } from "../../context/AuthContext";
 import { toast } from "react-toastify";
+import Navbar from "../Navbar";
 
 Modal.setAppElement("#root");
 
@@ -33,7 +34,10 @@ const History = () => {
                 const bookRes = await axios.get(
                   `https://localhost:7195/api/Books/${item.bookId}`
                 );
-                return { ...item, book: bookRes.data };
+                return {
+                  ...item,
+                  book: bookRes.data,
+                };
               })
             );
             return { ...order, items: enrichedItems };
@@ -52,7 +56,9 @@ const History = () => {
   }, [user]);
 
   const handleDeleteOrder = async (orderId) => {
-    const confirm = window.confirm("Are you sure you want to delete this order?");
+    const confirm = window.confirm(
+      "Are you sure you want to delete this order?"
+    );
     if (!confirm) return;
 
     try {
@@ -78,11 +84,14 @@ const History = () => {
 
   const submitReview = async () => {
     const payload = {
-      bookId: selectedBook.book.id,
+      bookId: selectedBook.bookId,
       userId: user.userId,
       rating: parseInt(review.rating),
       comment: review.comment.trim(),
     };
+
+    console.log("book", selectedBook.bookId);
+    console.log("pay", payload);
 
     try {
       await axios.post("https://localhost:7195/api/Reviews", payload);
@@ -94,10 +103,12 @@ const History = () => {
     }
   };
 
-  if (loading) return <div className="text-center py-10">Loading your orders...</div>;
+  if (loading)
+    return <div className="text-center py-10">Loading your orders...</div>;
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
+      <Navbar />
       <h2 className="text-3xl font-bold mb-6 text-center">Order History</h2>
 
       {orders.length === 0 ? (
@@ -112,7 +123,7 @@ const History = () => {
               onClick={() => handleDeleteOrder(order.id)}
               className="absolute top-4 right-4 text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
             >
-              Delete
+              Cancel
             </button>
 
             <div className="mb-4">
@@ -180,7 +191,9 @@ const History = () => {
             <textarea
               rows="4"
               value={review.comment}
-              onChange={(e) => setReview({ ...review, comment: e.target.value })}
+              onChange={(e) =>
+                setReview({ ...review, comment: e.target.value })
+              }
               className="w-full border border-gray-300 rounded px-3 py-2"
               placeholder="Write your thoughts about the book..."
             />
