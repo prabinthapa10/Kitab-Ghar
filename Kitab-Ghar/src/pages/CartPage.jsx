@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 export default function CartPage() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, userId } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {

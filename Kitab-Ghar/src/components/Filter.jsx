@@ -6,6 +6,7 @@ export function Filter({ onFilterChange }) {
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [availability, setAvailability] = useState(false);
+  const [sortOption, setSortOption] = useState("");
 
   useEffect(() => {
     const filters = {
@@ -14,9 +15,10 @@ export function Filter({ onFilterChange }) {
       minPrice,
       maxPrice,
       availability,
+      sort: sortOption,
     };
     onFilterChange(filters);
-  }, [genre, language, minPrice, maxPrice, availability]);
+  }, [genre, language, minPrice, maxPrice, availability, sortOption]);
 
   const clearAll = () => {
     setGenre("");
@@ -102,6 +104,20 @@ export function Filter({ onFilterChange }) {
             className="w-20 border px-2 py-1 text-sm rounded"
             placeholder="Max"
           />
+        </div>
+        <div className="space-y-2">
+          <h4 className="text-sm font-semibold">Sort By</h4>
+          <select
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value)}
+            className="w-full border px-2 py-1 text-sm rounded"
+          >
+            <option value="">Default</option>
+            <option value="price_asc">Price: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
+            <option value="title_asc">Title: A-Z</option>
+            <option value="title_desc">Title: Z-A</option>
+          </select>
         </div>
       </div>
     </div>
