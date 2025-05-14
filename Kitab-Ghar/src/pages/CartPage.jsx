@@ -108,6 +108,20 @@ export default function CartPage() {
     }
   };
 
+  const calculateDiscount = () => {
+    const totalQuantity = cartItems.reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    );
+
+    if (totalQuantity >= 10) {
+      return 0.1;
+    } else if (totalQuantity >= 5) {
+      return 0.05;
+    }
+    return 0;
+  };
+
   const Checkout = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -120,7 +134,7 @@ export default function CartPage() {
         body: JSON.stringify({
           userId: user.userId,
           status: "Pending",
-          totalAmount: parseFloat(total.toFixed(2)),
+          totalAmount: parseFloat(totalAfterDiscount.toFixed(2)),
           date: new Date().toISOString(),
         }),
       });
@@ -168,6 +182,11 @@ export default function CartPage() {
 
   const total = cartItems.reduce((sum, item) => sum + subtotal(item), 0);
 
+  const discountRate = calculateDiscount();
+  const discountAmount = total * discountRate;
+  const totalAfterDiscount = total - discountAmount;
+
+  console.log("total0", total);
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -263,10 +282,17 @@ export default function CartPage() {
                 </span>
               </div>
 
-              <div className="flex justify-between mb-6">
+              <div className="flex justify-between mb-3">
+                <span>Discount ({discountRate * 100}%)</span>
+                <span className="text-green-600">
+                  - Rs. {discountAmount.toLocaleString()}
+                </span>
+              </div>
+
+              <div className="flex justify-between mb-6 font-bold">
                 <span>Total</span>
-                <span className="text-amber-600 font-medium">
-                  Rs. {total.toLocaleString()}
+                <span className="text-amber-600">
+                  Rs. {totalAfterDiscount.toLocaleString()}
                 </span>
               </div>
 
