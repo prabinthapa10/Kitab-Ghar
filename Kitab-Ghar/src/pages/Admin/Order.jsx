@@ -15,14 +15,11 @@ export default function Orders() {
         const orderData = response.data;
         setOrders(orderData);
 
-        // Get unique userIds
         const uniqueUserIds = [
           ...new Set(orderData.map((order) => order.userId)),
         ];
 
-        // Fetch usernames for each userId
         const userMapTemp = {};
-        console.log(uniqueUserIds)
         await Promise.all(
           uniqueUserIds.map(async (userId) => {
             try {
@@ -146,34 +143,6 @@ export default function Orders() {
               ))}
             </tbody>
           </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="flex justify-between items-center text-sm text-gray-600">
-          <p>
-            Showing <strong>1</strong> to <strong>10</strong> of{" "}
-            <strong>42</strong> orders
-          </p>
-          <div className="flex gap-2">
-            <button
-              className="px-3 py-1 border rounded-md bg-white text-gray-400 cursor-not-allowed"
-              disabled
-            >
-              Previous
-            </button>
-            <button className="px-3 py-1 border rounded-md bg-slate-100 text-gray-900">
-              1
-            </button>
-            <button className="px-3 py-1 border rounded-md bg-white hover:bg-slate-50">
-              2
-            </button>
-            <button className="px-3 py-1 border rounded-md bg-white hover:bg-slate-50">
-              3
-            </button>
-            <button className="px-3 py-1 border rounded-md bg-white hover:bg-slate-50">
-              Next
-            </button>
-          </div>
         </div>
       </main>
     </div>
