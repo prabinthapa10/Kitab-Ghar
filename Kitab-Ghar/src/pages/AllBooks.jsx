@@ -53,7 +53,7 @@ const AllBooks = ({ filters = {} }) => {
         const res = await fetch(url);
         const data = await res.json();
         setBooks(data);
-        setCurrentPage(1); // reset to page 1 when books change
+        setCurrentPage(1);
       } catch (err) {
         console.error("Error fetching books:", err);
       }
@@ -77,10 +77,9 @@ const AllBooks = ({ filters = {} }) => {
 
   const getDiscountForBook = (bookId) => {
     const discount = discounts.find((d) => d.bookId === bookId && d.onSale);
-    return discount ? discount : null;
+    return discount || null;
   };
 
-  // Pagination logic
   const indexOfLastBook = currentPage * booksPerPage;
   const indexOfFirstBook = indexOfLastBook - booksPerPage;
   const currentBooks = books.slice(indexOfFirstBook, indexOfLastBook);
@@ -90,13 +89,16 @@ const AllBooks = ({ filters = {} }) => {
     setCurrentPage(pageNumber);
   };
 
-  console.log(currentBooks)
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 py-4">
         {currentBooks.length > 0 ? (
           currentBooks.map((book) => {
             const discount = getDiscountForBook(book.bookId);
+            const discountedPrice = discount
+              ? Math.round(book.price - (book.price * discount.percentage) / 100)
+              : null;
+
             return (
               <div
                 key={book.bookId}
@@ -109,7 +111,7 @@ const AllBooks = ({ filters = {} }) => {
                   title={book.title}
                   genre={book.genre}
                   price={book.price}
-                  priceAfterDiscount={book.discountedPrice}
+                  priceAfterDiscount={discountedPrice}
                 />
               </div>
             );
