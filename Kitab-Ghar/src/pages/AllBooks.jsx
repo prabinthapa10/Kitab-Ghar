@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "../components/Navbar";
 import BookCard from "../components/BookCard";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -51,7 +50,7 @@ const AllBooks = ({ filters = {} }) => {
 
           url = `https://localhost:7195/api/Books/filter?${params.toString()}`;
         } else {
-          url = `https://localhost:7195/api/Books`;
+          url = "https://localhost:7195/api/Books";
         }
 
         const res = await fetch(url);
@@ -93,8 +92,7 @@ const AllBooks = ({ filters = {} }) => {
   }, []);
 
   const getDiscountForBook = (bookId) => {
-    const discount = discounts.find((d) => d.bookId === bookId && d.onSale);
-    return discount || null;
+    return discounts.find((d) => d.bookId === bookId && d.onSale) || null;
   };
 
   const indexOfLastBook = currentPage * booksPerPage;
@@ -112,10 +110,6 @@ const AllBooks = ({ filters = {} }) => {
         {currentBooks.length > 0 ? (
           currentBooks.map((book) => {
             const discount = getDiscountForBook(book.bookId);
-            const discountedPrice = discount
-              ? Math.round(book.price - (book.price * discount.percentage) / 100)
-              : null;
-
             return (
               <div
                 key={book.bookId}
@@ -128,7 +122,9 @@ const AllBooks = ({ filters = {} }) => {
                   title={book.title}
                   genre={book.genre}
                   price={book.price}
-                  priceAfterDiscount={discountedPrice}
+                  priceAfterDiscount={
+                    book.discountedPrice > 0 ? book.discountedPrice : null
+                  }
                 />
               </div>
             );
@@ -140,7 +136,6 @@ const AllBooks = ({ filters = {} }) => {
         )}
       </div>
 
-      {/* Pagination Controls */}
       {books.length > booksPerPage && (
         <div className="flex justify-center items-center gap-2 py-4">
           <button
