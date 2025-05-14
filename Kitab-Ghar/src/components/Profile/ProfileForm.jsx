@@ -1,52 +1,34 @@
-// import React from "react";
-// import { useAuth } from "../../Context/AuthContext";
-
-// const ProfileForm = () => {
-//   const { user, loading, error } = useAuth();
-
-//   if (loading) {
-//     return <p>Loading user details...</p>;
-//   }
-
-//   if (error) {
-//     return <p>Error: {error}</p>;
-//   }
-
-//   if (!user) {
-//     return <p>No user data available.</p>;
-//   }
-//   return (
-//     <div className="p-4 border rounded-md shadow-sm">
-//       <h2 className="text-xl font-bold mb-2">User Details</h2>
-//       <p>
-//         <strong>Name:</strong> {user.name}
-//       </p>
-//       <p>
-//         <strong>Role:</strong> {user.role}
-//       </p>
-//       <p>
-//         <strong>Email:</strong> {user.email}
-//       </p>
-//       <p>
-//         <strong>ID:</strong> {user.id}
-//       </p>
-//     </div>
-//   );
-// };
-
-// export default ProfileForm;
-
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useAuth } from "../../Context/AuthContext";
 
 const ProfileForm = () => {
+  const { id } = useAuth(); // your logged-in user ID
   const [formData, setFormData] = useState({
-    firstName: "Jane",
-    lastName: "Doe",
-    email: "jane.doe@example.com",
-    bio: "I love mystery novels and historical fiction. Currently exploring more sci-fi titles and always looking for book recommendations!",
-    favoriteGenre: "Mystery",
-    readingGoal: "50",
+    name: "",
+    email: "",
+    address: "",
   });
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get(`https://localhost:7195/api/Users/${id}`);
+        const user = res.data;
+        setFormData({
+          name: user.name || "",
+          address: user.address || "",
+          email: user.email || "",
+        });
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    if (id) {
+      fetchUser();
+    }
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -58,37 +40,24 @@ const ProfileForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // You can submit this data to your backend here
     console.log("Submitted:", formData);
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h2 className="text-2xl font-bold mb-1">Personal Information</h2>
+    <div className="max-w-2xl mx-auto p-6">
+      <h2 className="text-2xl font-bold mb-2">Personal Information</h2>
       <p className="text-gray-500 mb-6">Update your profile information</p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block font-medium mb-1">First Name</label>
-            <input
-              type="text"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleChange}
-              className="w-full border rounded-md px-4 py-2"
-            />
-          </div>
-          <div>
-            <label className="block font-medium mb-1">Last Name</label>
-            <input
-              type="text"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              className="w-full border rounded-md px-4 py-2"
-            />
-          </div>
+        <div>
+          <label className="block font-medium mb-1">Full Name</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            className="w-full border rounded-md px-4 py-2"
+          />
         </div>
 
         <div>
@@ -103,46 +72,14 @@ const ProfileForm = () => {
         </div>
 
         <div>
-          <label className="block font-medium mb-1">Bio</label>
+          <label className="block font-medium mb-1">Address</label>
           <textarea
-            name="bio"
-            rows="4"
-            value={formData.bio}
+            name="address"
+            rows="3"
+            value={formData.address}
             onChange={handleChange}
             className="w-full border rounded-md px-4 py-2"
           />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block font-medium mb-1">Favorite Genre</label>
-            <select
-              name="favoriteGenre"
-              value={formData.favoriteGenre}
-              onChange={handleChange}
-              className="w-full border rounded-md px-4 py-2"
-            >
-              <option>Mystery</option>
-              <option>Historical Fiction</option>
-              <option>Fantasy</option>
-              <option>Science Fiction</option>
-              <option>Romance</option>
-              <option>Non-fiction</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block font-medium mb-1">
-              Annual Reading Goal
-            </label>
-            <input
-              type="number"
-              name="readingGoal"
-              value={formData.readingGoal}
-              onChange={handleChange}
-              className="w-full border rounded-md px-4 py-2"
-            />
-          </div>
         </div>
 
         <div>
