@@ -22,6 +22,10 @@ const AllBooks = ({ filters = {} }) => {
     const fetchBooks = async () => {
       try {
         let url = "";
+        const query = new URLSearchParams(location.search);
+        const title = query.get("search");
+        const isbn = query.get("isbn");
+        const genre = query.get("genre");
 
         if (title || isbn || genre) {
           const params = new URLSearchParams();
@@ -51,7 +55,20 @@ const AllBooks = ({ filters = {} }) => {
         }
 
         const res = await fetch(url);
-        const data = await res.json();
+        let data = await res.json();
+
+        if (filters.sort) {
+          if (filters.sort === "price_asc") {
+            data.sort((a, b) => a.price - b.price);
+          } else if (filters.sort === "price_desc") {
+            data.sort((a, b) => b.price - a.price);
+          } else if (filters.sort === "title_asc") {
+            data.sort((a, b) => a.title.localeCompare(b.title));
+          } else if (filters.sort === "title_desc") {
+            data.sort((a, b) => b.title.localeCompare(a.title));
+          }
+        }
+
         setBooks(data);
         setCurrentPage(1);
       } catch (err) {
