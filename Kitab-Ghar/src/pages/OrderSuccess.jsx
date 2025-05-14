@@ -48,7 +48,6 @@ export default function OrderSuccess() {
             };
           })
         );
-
         setOrderItems(enrichedItems);
       } catch (err) {
         console.error("Failed to load order details", err);
@@ -292,11 +291,12 @@ export default function OrderSuccess() {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
-            to="/orderHistory"
+            to="/user?tab=history"
             className="px-4 py-2 bg-amber-600 text-white rounded-md text-center hover:bg-amber-500"
           >
             View My Orders
           </Link>
+
           <Link
             href="/"
             className="px-4 py-2 border border-gray-300 bg-white rounded-md text-center hover:bg-gray-50 flex items-center justify-center sm:inline-flex"
