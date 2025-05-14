@@ -19,7 +19,9 @@ import AnnouncementPage from "./pages/Admin/AnnouncementPage";
 import PublicRoutes from "./routes/PublicRoutes";
 import ProtectedRoutes from "./routes/ProtectedRoutes";
 import OrderSuccess from "./pages/OrderSuccess";
-import OrderHistory from "./pages/OrderHistory";
+import Order from "./pages/Admin/Order";
+import Reviews from "./pages/Admin/Reviews";
+import History from "./components/Profile/History";
 
 function App() {
   return (
@@ -41,14 +43,15 @@ function App() {
           <Route path="/admin/addBook" element={<AddBook />} />
           <Route path="/admin/bookDetails" element={<BookDetail />} />
           <Route path="/orderSuccess/:orderId" element={<OrderSuccess />} />
-          <Route path="/orderHistory" element={<OrderHistory />} />
 
-          <Route element={<ProtectedRoutes roles={["Admin"]} />}>
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/addBook" element={<AddBook />} />
-            <Route path="/admin/bookDetails" element={<BookDetail />} />
-            <Route path="/admin/announcements" element={<AnnouncementPage />} />
-          </Route>
+          {/* <Route element={<ProtectedRoutes roles={["Admin"]} />}> */}
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/addBook" element={<AddBook />} />
+          <Route path="/admin/bookDetails" element={<BookDetail />} />
+          <Route path="/admin/announcements" element={<AnnouncementPage />} />
+          <Route path="/admin/orders" element={<Order />} />
+          <Route path="/admin/reviews" element={<Reviews />} />
+          {/* </Route> */}
           {/* <Route path="/book_card" element={<BookCard />} /> */}
           {/* <Route path="/book/" element={<BookList />} /> */}
           {/* <Route path="/book/:id" element={<BookDescriptionPage />} /> */}

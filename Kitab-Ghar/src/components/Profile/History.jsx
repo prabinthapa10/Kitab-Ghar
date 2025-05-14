@@ -1,94 +1,206 @@
-import React, { useState } from 'react';
-import { FaCheckCircle, FaCalendarAlt } from 'react-icons/fa';
+import { useEffect, useState } from "react";
+import axios from "axios";
+import Modal from "react-modal";
+import { useAuth } from "../../context/AuthContext";
+import { toast } from "react-toastify";
 
-const orders = [
-  {
-    id: 1,
-    title: 'Project Hail Mary',
-    author: 'Andy Weir',
-    date: '4/12/2023',
-    status: 'Completed',
-    rating: 5,
-  },
-  {
-    id: 2,
-    title: 'The Thursday Murder Club',
-    author: 'Richard Osman',
-    date: '3/28/2023',
-    status: 'Completed',
-    rating: 4,
-  },
-  {
-    id: 3,
-    title: 'Klara and the Sun',
-    author: 'Kazuo Ishiguro',
-    date: '3/15/2023',
-    status: 'Completed',
-    rating: 4,
-  },
-];
+Modal.setAppElement("#root");
 
 const History = () => {
-  const [activeTab, setActiveTab] = useState('Completed');
+  const { user } = useAuth();
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [review, setReview] = useState({ rating: "", comment: "" });
+
+  useEffect(() => {
+    const fetchUserOrders = async () => {
+      try {
+        const res = await axios.get(
+          `https://localhost:7195/api/Order/user/${user.userId}`
+        );
+        const orderList = Array.isArray(res.data) ? res.data : [];
+
+        const detailedOrders = await Promise.all(
+          orderList.map(async (order) => {
+            const itemsRes = await axios.get(
+              `https://localhost:7195/api/OrderItem/ByOrder/${order.id}`
+            );
+            const enrichedItems = await Promise.all(
+              itemsRes.data.map(async (item) => {
+                const bookRes = await axios.get(
+                  `https://localhost:7195/api/Books/${item.bookId}`
+                );
+                return { ...item, book: bookRes.data };
+              })
+            );
+            return { ...order, items: enrichedItems };
+          })
+        );
+
+        setOrders(detailedOrders);
+      } catch (error) {
+        console.error("Failed to fetch order history", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user?.userId) fetchUserOrders();
+  }, [user]);
+
+  const handleDeleteOrder = async (orderId) => {
+    const confirm = window.confirm("Are you sure you want to delete this order?");
+    if (!confirm) return;
+
+    try {
+      await axios.delete(`https://localhost:7195/api/Order/${orderId}`);
+      setOrders((prev) => prev.filter((order) => order.id !== orderId));
+      toast.success("Order deleted successfully");
+    } catch (err) {
+      console.error("Delete error:", err);
+      toast.error("Failed to delete order");
+    }
+  };
+
+  const openReviewModal = (book) => {
+    setSelectedBook(book);
+    setIsModalOpen(true);
+  };
+
+  const closeReviewModal = () => {
+    setIsModalOpen(false);
+    setReview({ rating: "", comment: "" });
+    setSelectedBook(null);
+  };
+
+  const submitReview = async () => {
+    const payload = {
+      bookId: selectedBook.book.id,
+      userId: user.userId,
+      rating: parseInt(review.rating),
+      comment: review.comment.trim(),
+    };
+
+    try {
+      await axios.post("https://localhost:7195/api/Reviews", payload);
+      toast.success("Review submitted successfully!");
+      closeReviewModal();
+    } catch (error) {
+      console.error("Submit error:", error);
+      toast.error("Failed to submit review");
+    }
+  };
+
+  if (loading) return <div className="text-center py-10">Loading your orders...</div>;
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold mb-1">Order History</h2>
-      <p className="text-gray-500 mb-6">Track your purchases and orders</p>
+      <h2 className="text-3xl font-bold mb-6 text-center">Order History</h2>
 
-      {/* Tabs */}
-      <div className="flex space-x-2 mb-6">
-        {['Completed', 'Pending'].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-md font-medium ${
-              activeTab === tab
-                ? 'bg-gray-200 text-black'
-                : 'text-gray-500 hover:text-black'
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      {/* Order List */}
-      {orders
-        .filter((order) => order.status === activeTab)
-        .map((order) => (
+      {orders.length === 0 ? (
+        <p className="text-center text-gray-500">You have no orders yet.</p>
+      ) : (
+        orders.map((order) => (
           <div
             key={order.id}
-            className="flex items-center justify-between bg-white border rounded-xl px-4 py-4 mb-4 shadow-sm"
+            className="bg-white border rounded-xl p-6 mb-6 shadow-sm relative"
           >
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-16 bg-gray-200 rounded-md" />
-              <div>
-                <h3 className="font-semibold">{order.title}</h3>
-                <p className="text-gray-600 text-sm">{order.author}</p>
-                <div className="flex items-center mt-1 text-sm text-gray-500 space-x-2">
-                  <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-xs font-medium rounded-full text-gray-700">
-                    <FaCheckCircle className="mr-1 text-green-600" />
-                    {order.status}
-                  </span>
-                  <span className="flex items-center">
-                    <FaCalendarAlt className="mr-1" />
-                    {order.date}
-                  </span>
-                </div>
-              </div>
+            <button
+              onClick={() => handleDeleteOrder(order.id)}
+              className="absolute top-4 right-4 text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+            >
+              Delete
+            </button>
+
+            <div className="mb-4">
+              <p>
+                <span className="font-medium">Order ID:</span> {order.id}
+              </p>
+              <p>
+                <span className="font-medium">Status:</span> {order.status}
+              </p>
+              <p>
+                <span className="font-medium">Total:</span> ₹{order.totalAmount}
+              </p>
             </div>
-            {/* Rating */}
-            <div className="flex text-orange-400">
-              {[...Array(order.rating)].map((_, i) => (
-                <span key={i}>★</span>
+
+            <h4 className="font-semibold mb-2">Books:</h4>
+            <ul className="space-y-3">
+              {order.items.map((item) => (
+                <li
+                  key={item.id}
+                  className="flex justify-between items-center border px-4 py-2 rounded"
+                >
+                  <div>
+                    <p className="font-medium">{item.book.title}</p>
+                    <p className="text-sm text-gray-500">
+                      Quantity: {item.quantity}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => openReviewModal(item)}
+                    className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                  >
+                    Write Review
+                  </button>
+                </li>
               ))}
-              {[...Array(5 - order.rating)].map((_, i) => (
-                <span key={i} className="text-gray-300">★</span>
-              ))}
-            </div>
+            </ul>
           </div>
-        ))}
+        ))
+      )}
+
+      {/* Review Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={closeReviewModal}
+        className="bg-white p-6 rounded-lg max-w-md w-full shadow-lg mx-auto mt-24"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center"
+      >
+        <h2 className="text-xl font-semibold mb-4">
+          Review: {selectedBook?.book?.title}
+        </h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block mb-1 font-medium">Rating (1–5)</label>
+            <input
+              type="number"
+              min="1"
+              max="5"
+              value={review.rating}
+              onChange={(e) => setReview({ ...review, rating: e.target.value })}
+              className="w-full border border-gray-300 rounded px-3 py-2"
+            />
+          </div>
+          <div>
+            <label className="block mb-1 font-medium">Comment</label>
+            <textarea
+              rows="4"
+              value={review.comment}
+              onChange={(e) => setReview({ ...review, comment: e.target.value })}
+              className="w-full border border-gray-300 rounded px-3 py-2"
+              placeholder="Write your thoughts about the book..."
+            />
+          </div>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={submitReview}
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+            >
+              Submit
+            </button>
+            <button
+              onClick={closeReviewModal}
+              className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
